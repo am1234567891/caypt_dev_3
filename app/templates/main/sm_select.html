@@ -1,0 +1,237 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Selective Match
+    {% if current_room_code > 0 %}
+         - Room {{ master_mrooms[current_room_code-1][1] }}
+        - Round {{sm_current_room_round_pairs[0]}}
+        - Stage {{current_stage_code}}
+    {% endif %}
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <div class="alert alert-danger">
+          <strong>Caution! Once you click submit, you can't go back until completing this stage!</strong>
+            If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="#">Round</a></li>
+            <li><a href="#">Draw</a></li>
+            <li class="active"><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li><a href="#">Enter Scores</a></li>
+            <li><a href="#">Validate</a></li>
+        </ul>
+
+    </div>
+    <form class="form-inline" action="" method="POST">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <input type="hidden" name="current_room_code" value="{{current_room_code}}">
+            <input type="hidden" name="current_round_code" value="{{sm_current_room_round_pairs[0]}}">
+            <input type="hidden" name="current_plan_id" value="{{plan_id}}">
+            <input type="hidden" name="current_pair_id" value="{{current_stage_agenda[1]}}">
+            <input type="hidden" name="current_stage_code" value="{{current_stage_code}}">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3>Please select team member:</h3><BR><BR>
+                </div>
+                <div class="col-lg-2">
+                    <BR>
+                </div>
+                <div class="col-lg-4">
+                    <BR><button type="submit" class="btn btn-info" onclick="return confirm('Please double check your data, it can not be re-do! DO NOT use the back button in the browser! Are you sure?')">Submit</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group"> <!-- reporter mteam_code: {{current_stage_agenda[2][0][1]}} -->
+                        <label for="reporter">Reporter: {{ master_mteams[current_stage_agenda[2][0][1]-1][1]}} </label>
+                        <!-- school id: {{ master_mteams[current_stage_agenda[2][0][1]-1][2][8]}} -->
+                        <BR> School: {{ master_mteams[current_stage_agenda[2][0][1]-1][2][9]}}<BR>
+                        <select class="form-control" id="reporter" name="reporter">
+                            <option selected value="0">Select....................</option>
+                            {% for team_member in master_mteams[current_stage_agenda[2][0][1]-1][3] %}
+                                <option value="{{team_member[0]}}--{{team_member[2]}}">{{team_member[2]}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group"> <!-- reporter mteam_code: {{current_stage_agenda[2][1][1]}} -->
+                        <label for="opponent">Opponent: {{ master_mteams[current_stage_agenda[2][1][1]-1][1]}} </label>
+                        <BR> School: {{ master_mteams[current_stage_agenda[2][1][1]-1][2][9]}}<BR>
+                        <select class="form-control" id="opponent" name="opponent">
+                            <option selected value="0">Select....................</option>
+                            {% for team_member in master_mteams[current_stage_agenda[2][1][1]-1][3] %}
+                                <option value="{{team_member[0]}}--{{team_member[2]}}">{{team_member[2]}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <BR>
+        </div>
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Reporter Team Member Participation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if reporter_team_members_roles == 0 %}
+                                <tr><td>No one participated at any stage yet.</td></tr>
+                            {% else %}
+                                {% for team_member in master_mteams[current_stage_agenda[2][0][1]-1][3] %}
+                                    {% if team_member[0] not in reporter_team_members_roles[3] %}
+                                        <tr>
+                                            <td>
+                                                {{team_member[0]}}--{{team_member[2]}}
+                                                <ul><li>Not yet</li></ul>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for team_member in reporter_team_members_roles[2] %}
+                                    <tr>
+                                        <td>
+                                            {{team_member[0]}}--{{team_member[1]}}
+                                            {% if team_member[2] == 1 %}
+                                                (Captain)
+                                            {% endif %}
+                                            {% if team_member[4] == 3 %}
+                                                <BR><font color="red">(3 times as reporter, can't be reporter anymore!)</font>
+                                            {% endif %}
+                                            <ul>
+                                            {% for row in team_member[3] %}
+                                                <li>
+                                                    Round {{row[7]}}{{row[6]}} Stage: {{row[1]}} -
+                                                    {% if row[2] == 1 %}
+                                                        <font color="red">Reporter</font>
+                                                    {% elif row[2] == 2 %}
+                                                        Opponent
+                                                    {% endif %}
+                                                    (Problem {{row[11]}})
+                                                </li>
+                                            {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-6">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Opponent Team Member Participation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if opponent_team_members_roles == 0 %}
+                                <tr><td>No one participated at any stage yet.</td></tr>
+                            {% else %}
+                                {% for team_member in master_mteams[current_stage_agenda[2][1][1]-1][3] %}
+                                    {% if team_member[0] not in opponent_team_members_roles[3] %}
+                                        <tr>
+                                            <td>
+                                                {{team_member[0]}}--{{team_member[2]}}
+                                                <ul><li>Not yet</li></ul>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for team_member in opponent_team_members_roles[2] %}
+                                    <tr>
+                                        <td>
+                                            {{team_member[0]}}--{{team_member[1]}}
+                                            {% if team_member[2] == 1 %}
+                                                (Captain)
+                                            {% endif %}
+                                            <ul>
+                                            {% for row in team_member[3] %}
+                                                <li>
+                                                    Round {{row[7]}}{{row[6]}} Stage: {{row[1]}} -
+                                                    {% if row[2] == 1 %}
+                                                        <font color="red">Reporter</font>
+                                                    {% elif row[2] == 2 %}
+                                                        Opponent
+                                                    {% endif %}
+                                                    (Problem {{row[11]}})
+                                                </li>
+                                            {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Problem</th>
+                                {% for item in problem_label_codes %}
+                                    <th>{{item[0]}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in team_problems %}
+                            <tr>
+                                <td>
+                                    {% if current_stage_agenda[2][0][1] == team[0] %}
+                                        Rpt:
+                                    {% else %}
+                                        Opp:
+                                    {% endif %}
+                                    {{master_mteams[team[0]-1][1]}}
+                                </td>
+                                    {% for problem in team[1] %}
+                                        <td>
+                                            {% if problem[1] %}
+                                                {% for item in problem [1][0]%}
+                                                    R{{item[0]}}S{{item[2]}}-
+                                                    {% if item[4] == 3 %}
+                                                        Accepted
+                                                    {% else %}
+                                                        <font color="red">Rejected</font>
+                                                    {% endif %}
+                                                    <BR>
+                                                {% endfor %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    Program guide: <font color="red">{{sm_current_room_round_pairs[4]}}</font>
+                </div>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}

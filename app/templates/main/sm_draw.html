@@ -1,0 +1,209 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Selective Match
+    {% if current_room_code > 0 %}
+         - Room {{ master_mrooms[current_room_code-1][1] }}
+         - Round {{sm_current_room_round_pairs[0]}}
+    {% endif %}
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <ul class="nav nav-tabs">
+            <li><a href="/sm_mgmt">Round</a></li>
+            <li class="active"><a href="#">Draw</a></li>
+            <li><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li><a href="#">Enter Scores</a></li>
+            <li><a href="#">Validate</a></li>
+        </ul>
+        <br>
+    </div>
+    {% if sm_current_room_round_pairs[2] == 0 %}
+        <form class="form-inline" action="" method="POST">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="current_room_code" value="{{current_room_code}}">
+            <input type="hidden" name="current_round_code" value="{{sm_current_room_round_pairs[0]}}">
+            <input type="hidden" name="current_plan_id" value="{{plan_id}}">
+            <div class = "container">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <h3>Draw Results and Juror Check-in</h3>
+                    </div>
+                    <div class="col-lg-8">
+                        <BR><button type="submit" class="btn btn-info" onclick="return confirm('Please double check your data, it can not be re-do! DO NOT use the back button in the browser! Are you sure?')">Submit</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <BR><button type="button" class="btn btn-warning" onclick="randomDraw()">Random Draw</button><BR><BR>
+                    </div>
+                    <div class="col-lg-8">
+                        <BR><h5>Please check all the jurors who are on board.</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+
+                        <div class="form-group">
+                            <label for="team1">Team <span style='font-size:18px; color:black'>&#10102;</span>:</label>
+                            <select class="form-control" id="team1" name="team1">
+                                <option value="0" selected>Please select...</option>
+                                {% for team in sm_current_room_round_pairs[1] %}
+                                    <option value="{{team[4]}}">{{ master_mteams[team[4]-1][1]}}</option>
+                                {% endfor %}
+                            </select>
+                        </div><BR><BR>
+                        <div class="form-group">
+                            <label for="team2">Team <span style='font-size:18px; color:black'>&#10103;</span>:</label>
+                            <input type="hidden" id="team2" name="team2" value="0"/>
+                            <span id="team2Txt"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Pre-scheduled jurors / Schools conflicted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for juror in current_pair_assigned_jurors %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" id="jury" name="jury" value="{{juror[2]}}--{{juror[0]}}--{{juror[1]}}">
+                                            <!-- mjuror code: {{juror[2]}} -->
+                                            {{ master_mjurors[juror[2]-1][1]}}
+                                            {% if master_mjurors[juror[2]-1][2][7] == "Yes" %}
+                                                (Chair)
+                                            {% endif %}
+                                            {% if master_mjurors[juror[2]-1][3] == 0 %}
+                                                <ul><li>no</li></ul>
+                                            {% else %}
+                                                <ul>
+                                                {% for cois in master_mjurors[juror[2]-1][4] %}
+                                                    <li>
+                                                        {{cois[1]}} - {{cois[2]}} - {{cois[2]}}
+                                                    </li>
+                                                {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>NOT pre-scheduled jurors / Schools conflicted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for extra_juror in master_mjurors %}
+                                    {% if extra_juror[0] not in current_pair_assigned_juror_codes and extra_juror[2][7] != "Yes" %}
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" id="jury" name="jury" value="{{extra_juror[0]}}--0--{{extra_juror[2][2]}}">
+                                                <!-- mjuror code: {{extra_juror[0]}} -->
+                                                 {{ extra_juror[1]}}
+                                                {% if extra_juror[2][7] == "Yes" %}
+                                                    (Chair)
+                                                {% endif %}
+                                                {% if extra_juror[3] == 0 %}
+                                                    <ul><li>no</li></ul>
+                                                {% else %}
+                                                    <ul>
+                                                    {% for cois in extra_juror[4] %}
+                                                        <li>
+                                                            {{cois[1]}} - {{cois[2]}} - {{cois[2]}}
+                                                            {% if cois[0] in (master_mteams[sm_current_room_round_pairs[1][0][4]-1][2][8], master_mteams[sm_current_room_round_pairs[1][1][4]-1][2][8])%}
+                                                                <font color="red">conflict</font>
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% elif sm_current_room_round_pairs[2] == 1 or sm_current_room_round_pairs[2] == 12 or sm_current_room_round_pairs[2] == 13 %}
+        <div class = "container">
+            <h3>Draw Results</h3>
+            <h5>
+                Team <span style='font-size:18px; color:black'>&#1010{{sm_current_room_round_pairs[1][0][5] + 1}};</span>:{{ master_mteams[sm_current_room_round_pairs[1][0][4]-1][1]}} <BR>
+                Team <span style='font-size:18px; color:black'>&#1010{{sm_current_room_round_pairs[1][1][5] + 1}};</span>:{{ master_mteams[sm_current_room_round_pairs[1][1][4]-1][1] }}
+            </h5><BR>
+            <span class="d-block bg-info">
+                Please click the Stage No. to start the competition, and you can't go back until you finish this stage. <BR><BR>
+            </span>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Stage No.</th>
+                                <th>SM Agenda</th>
+                                <th>Reporter</th>
+                                <th>Opponent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    {% if sm_current_room_round_pairs[2] == 1 %}
+                                        <a href="/sm_select?room={{current_room_code}}&round={{sm_current_room_round_pairs[0]}}&plan={{ plan_id }}&stage=1">Stage 1</a>
+                                    {% else %}
+                                        Stage 1
+                                    {% endif %}
+                                </td>
+                                <td>&#10102; - &#10103; </td>
+                                <td>{{ master_mteams[sm_current_room_round_pairs[1][0][4]-1][1]}}</td>
+                                <td>{{ master_mteams[sm_current_room_round_pairs[1][1][4]-1][1] }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if sm_current_room_round_pairs[2] == 13 %}
+                                        <a href="/sm_select?room={{current_room_code}}&round={{sm_current_room_round_pairs[0]}}&plan={{ plan_id }}&stage=2">Stage 2</a>
+                                    {% else %}
+                                        Stage 2
+                                    {% endif %}
+                                </td>
+                                <td>&#10103; - &#10102; </td>
+                                <td>{{ master_mteams[sm_current_room_round_pairs[1][1][4]-1][1] }}</td>
+                                <td>{{ master_mteams[sm_current_room_round_pairs[1][0][4]-1][1]}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <script type="text/javascript">
+    function randomDraw(team1Id) {
+        var x = Math.floor((Math.random() * 2) + 1);
+        document.getElementById('team1').selectedIndex = x;
+        team_unselected = 2
+        if (x == 2) {
+            team_unselected = 1
+        }
+        document.getElementById('team2').value = document.getElementById('team1').options[team_unselected].value ;
+        document.getElementById('team2Txt').innerHTML = document.getElementById('team1').options[team_unselected].label;
+    }
+    </script>
+{% endblock %}

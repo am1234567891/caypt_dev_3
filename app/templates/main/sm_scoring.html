@@ -1,0 +1,127 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Selective Match
+    {% if current_room_code > 0 %}
+         - Room {{ master_mrooms[current_room_code-1][1] }}
+        - Round {{sm_current_room_round_pairs[0]}}
+        - Stage {{current_stage_code}}
+    {% endif %}
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <div class="alert alert-danger">
+          <strong>Caution! Please enter the scores carefully. Once you submit it can NOT be re-do.</strong>
+            If you have any questions, please contact the Information Team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="/stage_mgmt">Round</a></li>
+            <li><a href="#">Draw</a></li>
+            <li><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li class="active"><a href="#">Enter Scores</a></li>
+            <li><a href="#">Validate</a></li>
+        </ul>
+    </div>
+    <div class = "container">
+        <h3>SCORESHEET</h3>
+        <h5>
+            {% for problem in current_stage_problems[1] %}
+                {% if problem['problem_status'] == 3 %}
+                    Fight {{sm_current_room_round_pairs[0]}} {{ master_mrooms[current_room_code-1][1] }}, Stage: {{current_stage_code}},
+                    {{ problem['problem_label'] }}
+                    {{ break }}
+                {% endif %}
+            {% endfor %}
+        </h5>
+        <div class="btn-group">
+            <button type="button" class="btn btn-info">Rep: {{ master_mteams[current_stage_agenda[2][0][1]-1][1]}} - ({{current_stage_agenda[2][0][2][6]}}) </button>
+            <button type="button" class="btn btn-primary">Opp: {{ master_mteams[current_stage_agenda[2][1][1]-1][1]}} - ({{current_stage_agenda[2][1][2][6]}}) </button>
+        </div>
+        <BR>
+        <HR>
+    </div>
+    <form class="form-inline" action="" method="POST">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Juror</th>
+                                <th>Reporter Scores</th>
+                                <th>Opponent Scores</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for juror in current_jury %}
+                                <tr>
+                                    <td>
+                                        {{ master_mjurors[juror[0]-1][1]}}
+                                        {% if juror[3][3] == "Yes" %}
+                                            <BR>(Chair)
+                                        {% endif %}
+                                    </td>
+                                <td>
+                                    <div class="form-group" id="j_{{juror[0]}}_rep">
+                                        <input type="number" step="0.1" placeholder="0.0" required max="1" min="0" title="0 ~ 1" readonly
+                                               class="form-control" id="j_{{juror[0]}}_rep_1_{{juror[3][2]}}" name="j_{{juror[0]}}_rep_1_{{juror[3][2]}}" size="1" value="1">+
+                                        <input type="number" step="0.1" placeholder="0.0" required max="7" min="0" title="0 ~ 7"
+                                               class="form-control" id="j_{{juror[0]}}_rep_2_{{juror[3][2]}}" name="j_{{juror[0]}}_rep_2_{{juror[3][2]}}" size="2">+
+                                        <input type="number" step="0.1" placeholder="0.0" required max="3" min="0" title="0 ~ 3"
+                                               class="form-control" id="j_{{juror[0]}}_rep_3_{{juror[3][2]}}" name="j_{{juror[0]}}_rep_3_{{juror[3][2]}}" size="2">+
+                                        <input type="number" step="0.1" placeholder="-0.0" required max="0" min="-2" title="-2 ~ 0"
+                                               class="form-control" id="j_{{juror[0]}}_rep_4_{{juror[3][2]}}" name="j_{{juror[0]}}_rep_4_{{juror[3][2]}}" size="2">
+                                        <button type="button" class="btn btn-default" onclick="checkTotal('j_{{juror[0]}}_rep', 'j_{{juror[0]}}_rep_5')">=</button>
+                                    </div>
+                                    <h3><span class="label label-success" id="j_{{juror[0]}}_rep_5"></span></h3>
+                                </td>
+                                <td>
+                                    <div class="form-group" id="j_{{juror[0]}}_opp">
+                                        <input type="number" step="0.1" placeholder="0.0" required max="1" min="0" title="0 ~ 1" readonly
+                                               class="form-control" id="j_{{juror[0]}}_opp_1_{{juror[3][2]}}" name="j_{{juror[0]}}_opp_1_{{juror[3][2]}}" size="2" value="1">+
+                                        <input type="number" step="0.1" placeholder="0.0" required max="2" min="0" title="0 ~ 2"
+                                               class="form-control" id="j_{{juror[0]}}_opp_2_{{juror[3][2]}}" name="j_{{juror[0]}}_opp_2_{{juror[3][2]}}" size="2">+
+                                        <input type="number" step="0.1" placeholder="0.0" required max="4" min="0" title="0 ~ 4"
+                                               class="form-control" id="j_{{juror[0]}}_opp_3_{{juror[3][2]}}" name="j_{{juror[0]}}_opp_3_{{juror[3][2]}}" size="2">+
+                                        <input type="number" step="0.1" placeholder="0.0" required max="4" min="0" title="0 ~ 4"
+                                               class="form-control" id="j_{{juror[0]}}_opp_4_{{juror[3][2]}}" name="j_{{juror[0]}}_opp_4_{{juror[3][2]}}" size="2">+
+                                        <input type="number" step="0.1" placeholder="-0.0" required max="0" min="-2" title="-2 ~ 0"
+                                               class="form-control" id="j_{{juror[0]}}_opp_5_{{juror[3][2]}}" name="j_{{juror[0]}}_opp_5_{{juror[3][2]}}" size="2">
+                                        <button type="button" class="btn btn-default" onclick="checkTotal('j_{{juror[0]}}_opp', 'j_{{juror[0]}}_opp_6')">=</button>
+                                    </div>
+                                    <h3><span class="label label-success" id="j_{{juror[0]}}_opp_6"></span></h3>
+                                </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <h3 style="color: red;">DO NOT double click the Submit button </h3>Double clicking the Submit button will crash the system. If you don't know if you clicked or NOT, please contact Information Team ASAP<BR>
+            <button type="submit" class="btn btn-info pull-right" onclick="return confirm('Please double check your data, it can not be re-do! DO NOT use the back button in the browser! Are you sure?')">Submit</button>
+        </div>
+    </form>
+
+    <script>
+    function checkTotal(scoreItemsDivId, scoreTotalDivId) {
+        var x = document.getElementsByTagName("input");
+        var y = 0.0;
+        for(var i = 0; i < x.length; i++)
+        {
+            if(x[i].parentNode == document.getElementById(scoreItemsDivId))
+            {
+               y = y + parseFloat(x[i].value);
+            }
+        }
+
+        document.getElementById(scoreTotalDivId).innerHTML = y;
+    }
+    </script>
+{% endblock %}

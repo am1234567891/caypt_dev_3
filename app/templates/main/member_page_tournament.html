@@ -1,0 +1,240 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}Member Dashboard<HR>
+    <div class="dropdown" style="float: right">
+        {% if led_teams_count > 0 %}
+            {% if myparticipation_count > 0 and myparticipation_list[0][0] == "Juror" %}
+                <a href="/my_schedule?type=13" class="btn btn-info">My Schedule</a>
+            {% else %}
+                <a href="/my_schedule?type=1" class="btn btn-info">My Schedule</a>
+            {% endif %}
+        {% elif joined_teams_count > 0 %}
+            <a href="/my_schedule?type=2" class="btn btn-info">My Schedule</a>
+        {% elif myparticipation_count > 0 and myparticipation_list[0][0] == "Juror" %}
+            <a href="/my_schedule?type=3" class="btn btn-info">My Schedule</a>
+        {% elif myparticipation_count > 0 and myparticipation_list[0][0] == "Volunteer" %}
+            <a href="/my_schedule?type=4" class="btn btn-info">My Schedule</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+     <div class="container mt-3">
+        {% if led_teams_count<1 and joined_teams_count<1 and myparticipation_count<1 %}
+            <h2>Registration for CaYPT 2020 is closed. See you in 2021.</h2>
+            <HR>
+        {% else %}
+            {% if led_teams_count > 0 %}
+                <h2>Team(s) that I led</h2>
+                <HR>
+                {% if myparticipation_count <1 and member_age >= 20 and my_background >= 20 %}
+                    <div class="container">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4>
+                                    Team Leads are encouraged to <a href="{{ url_for('main.be_juror_as_tl') }}?school={{ form.school_id.data }}">be a Juror</a>
+                                    <!-- <a href="{{ url_for('main.be_juror') }}" class="btn btn-info">Join as a Juror</a> -->
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <table class="table medium">
+                    <thead>
+                        <tr>
+                          <th>Team Name</th>
+                          <th>Team Status</th>
+                          <th>School Name</th>
+                          <th>Teleconferencing?</th>
+                          <th>Team Members</th>
+                        </tr>
+                    </thead>
+                    {% for row in led_teams_list %}
+                        <tr>
+                           <td> {{ row[1] }} </td>
+                           <td>
+                               {{ row[2] }}
+                                {% if row[2] == 'Requested' %}
+                                    on {{ row[8] }}
+                                {% endif %}
+
+                           </td>
+                           <td>  {{ row[3] }} </td>
+                           <td>  {{ row[11] }} </td>
+                           <td>
+                               {% if row[5] > 0 %}
+                                <table class="table medium">
+                                    <thead>
+                                        <tr>
+                                          <th>Member Name</th>
+                                          <th>Member Status</th>
+                                          <th>DoB</th>
+                                          <th>Is Captain</th>
+                                          <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    {% for member in row[6] %}
+                                        <tr>
+                                            <td>
+                                                {{ member[4] }} {{ member[5] }}
+                                            </td>
+                                            <td>
+                                                {{ member[3] }}
+                                                {% if member[3] == 'Requested' %}
+                                                    on {{ member[8] }}<BR>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ member[7] }}
+                                            </td>
+                                            <td>
+                                                {% if member[2] == 1 %}
+                                                    Captain
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ member[6] }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tr>
+                                </table>
+                               {% else %}
+                                    No team member yet
+                               {% endif %}
+                           </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            {% if joined_teams_count > 0 %}
+                <h2>Team that I joined</h2>
+                <HR>
+                <span class="d-block bg-info">
+                    You can only join one team for current year.<BR>
+                </span>
+                <table class="table medium">
+                    <thead>
+                        <tr>
+                          <th>School Name</th>
+                          <th>Team Name</th>
+                          <th>My Status</th>
+                          <th>Is Captain</th>
+                          <th>Team Lead Name</th>
+                          <th>Team Lead Email</th>
+                        </tr>
+                    </thead>
+                    {% for EVENT_ID, EVENT_NAME, TEAM_MEMBER_ID, TEAM_MEMBER_USER_ID, IS_CAPTAIN, MEMBER_STATUS, COMMENTS, TEAM_ID, TEAM_NAME, TEAM_STATUS, SCHOOL_ID, SCHOOL_NAME, SCHOOL_ADDRESS, SCHOOL_CITY, SCHOOL_PROVINCE, SCHOOL_COUNTRY, TEAM_LEAD_ID, TEAM_LEAD_FIRST_NAME, TEAM_LEAD_LAST_NAME, TEAM_LEAD_EMAIL in joined_teams_list %}
+                        <tr>
+                           <td> {{ SCHOOL_NAME }} - {{ SCHOOL_PROVINCE }} - {{ SCHOOL_CITY }}</td>
+                           <td> {{ TEAM_NAME }} </td>
+                           <td> {{ MEMBER_STATUS }} </td>
+                           <td>
+                                {% if IS_CAPTAIN == 0 %}
+                                    N
+                                {% else %}
+                                    Y
+                                {% endif %}
+                           </td>
+                           <td> {{ TEAM_LEAD_FIRST_NAME + " " +  TEAM_LEAD_LAST_NAME }} </td>
+                           <td> {{ TEAM_LEAD_EMAIL }} </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            {% if myparticipation_count > 0 %}
+                <h2>Get Involved!</h2>
+                <HR>
+                <span class="d-block bg-info">
+                    Thank you for your contribution.<BR>
+                </span>
+                <table class="table medium">
+                    <thead>
+                        <tr>
+                          <th>My Role</th>
+                          <th>My Status</th>
+                          <th>Teleconferencing?</th>
+                          <th>Juror Experience?</th>
+                          <th>Availability</th>
+                          <th>Has Conflict?</th>
+                          <th>Conflicted School(s)</th>
+                        </tr>
+                    </thead>
+                    {% for row in myparticipation_list %}
+                        <tr>
+                           <td>
+                               {{ row[0] }}
+                               {% if row[10] > 0 %}
+                                    (team lead) <BR>
+                               {% else %}
+                                    <BR>
+                               {% endif %}
+                           </td>
+                           <td> {{ row[2] }} </td>
+                           <td>
+                               {% if row[0] == "Volunteer" %}
+                                    Not Applicable
+                               {% else %}
+                                    {{ row[4] }}
+                               {% endif %}
+                           </td>
+                           <td>
+                               {% if row[0] == "Juror" %}
+                                    {{ row[11] }}
+                                    {% if row[12] == "Yes" %}
+                                    <BR>Your are nominated as Chair
+                                    {% endif %}
+                               {% else %}
+                                    Not Applicable
+                               {% endif %}
+                           </td>
+                           <td>
+                                {% if row[5] == "Yes" %}
+                                    <li>
+                                        Day 1 (Saturday Feb 29th, 2020) 10am - 2pm
+                                    </li>
+                                {% endif %}
+                                {% if row[6] == "Yes" %}
+                                    <li>
+                                        Day 1 (Saturday Feb 29th, 2020) 2pm - 6pm
+                                    </li>
+                                {% endif %}
+                                {% if row[7] == "Yes" %}
+                                    <li>
+                                        Day 2 (Saturday Mar 7th, 2020) 10am - 3pm
+                                    </li>
+                                {% endif %}
+                                {% if row[8] == "Yes" %}
+                                    <li>
+                                        Day 2 (Saturday Mar 7th, 2020) 3pm - 7pm
+                                    </li>
+                                {% endif %}
+                           </td>
+                           <td>
+                               {% if row[1] == 1 %}
+                                    Yes
+                               {% else %}
+                                    No
+                               {% endif %}
+                           </td>
+                           <td>
+                                <ul>
+                                {% for school in row[3] %}
+                                    <li>
+                                        {{ school[2] }} - {{ school[4] }} - {{ school[5] }}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                           </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endif %}
+      </div>
+
+{% endblock %}

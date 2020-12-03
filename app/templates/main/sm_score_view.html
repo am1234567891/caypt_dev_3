@@ -1,0 +1,369 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    {% if view_type == 1 %}
+        Selective Match
+        {% if current_room_code > 0 %}
+             - Room {{ master_mrooms[current_room_code-1][1] }}
+             - Round {{current_round_code}}
+        {% endif %}
+    {% else %}
+        Tournament Admin Management
+        <div class="dropdown" style="float: right">
+            <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+            <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+              <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+              <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+              <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+    {% if view_type == 1 %}
+        <div class="container mt-3">
+            <ul class="nav nav-tabs">
+                <li><a href="/sm_mgmt">Round</a></li>
+                <li><a href="#">Draw</a></li>
+                <li><a href="#">Assign Member</a></li>
+                <li><a href="#">Timing</a></li>
+                <li><a href="#">Enter Scores</a></li>
+                <li><a href="#">Validate</a></li>
+                <li class="active"><a href="#">View Score</a></li>
+            </ul>
+        </div>
+    {% else %}
+        <div class="container mt-3">
+            <ul class="nav nav-tabs">
+                <li><a href="/admin_mgmt">View Plan</a></li>
+                <li><a href="/publish">Publish</a></li>
+                <li class="active"><a href="#">View Score</a></li>
+            </ul>
+            <br>
+        </div>
+    {% endif %}
+    <div class = "container">
+        {% if view_type == 1 %}
+            <h3>View Scores</h3>
+        {% else %}
+            <h3>View Scores - Round {{current_round_code}} - Room {{master_mrooms[current_room_code-1][1]}}</h3>
+        {% endif %}
+        <h4>
+            Grades
+            {% for team_score in ranked_team_codes_SP %}
+                <input type="hidden" name="ds_f{{loop.index}}_mteam_code" value="{{current_team_codes[team_score['original_team_sequence']-1]}}">
+                <input type="hidden" name="ds_f{{loop.index}}_mteam_code_SP" value="{{current_team_codes_SP[team_score['original_team_sequence']-1]}}">
+                <input type="hidden" name="ds_f{{loop.index}}_mteam_code_fw" value="{{team_score['fw']}}">
+                <span class="label label-info lb-md">
+                    {{master_mteams[current_team_codes[team_score['original_team_sequence']-1] -1][1]}}: {{current_team_codes_SP[team_score['original_team_sequence']-1]}}
+                    {% if team_score['ranking'] == 1 %}
+                        <font color="gold" size="3">★</font>
+                    {% endif %}
+                </span>
+            {% endfor %}
+        </h4><BR>
+        <div class="row">
+            <div class="col-lg-6">
+                Stage {{sm_current_pair_scores[0][0]}} - Problem
+                {% for problem in current_stage_problems[sm_current_pair_scores[0][0] - 1][1]%}
+                    {% if problem[4] == 3 %}
+                        <span class="badge badge-success">{{problem[2]}}</span>
+                    {% else %}
+                        <span class="badge badge-error">{{problem[2]}}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-lg-6">
+                Stage {{sm_current_pair_scores[1][0]}} - Problem
+                {% for problem in current_stage_problems[sm_current_pair_scores[1][0] - 1][1]%}
+                    {% if problem[4] == 3 %}
+                        <span class="badge badge-success">{{problem[2]}}</span>
+                    {% else %}
+                        <span class="badge badge-error">{{problem[2]}}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>
+                                Reporter: {{master_mteams[sm_current_pair_scores[0][2][0][1]-1][1]}}
+                            </th>
+                            <th>
+                                Opponent: {{master_mteams[sm_current_pair_scores[0][2][1][1]-1][1]}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td>{{sm_current_pair_scores[0][2][0][4][1]}}</td>
+                            <td>{{sm_current_pair_scores[0][2][1][4][1]}}</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Juror</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in sm_current_pair_scores[0][2][0][3] %}
+                                            <tr><td> {{master_mjurors[row[1]-1][1]}} </td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </td>
+                            <td>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Scores</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in sm_current_pair_scores[0][2][0][3] %}
+                                            <tr>
+                                                <td>
+                                                    <strong>
+                                                        {{row[2]}}
+                                                    </strong>
+                                                     = {{row[3]}} + {{row[4]}} + {{row[5]}}
+                                                    {% if row[6] >= 0 %}
+                                                        + {{row[6]}}
+                                                    {% else %}
+                                                        - {{0-row[6]}}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Scores</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in sm_current_pair_scores[0][2][1][3] %}
+                                            <tr>
+                                                <td>
+                                                    <strong>
+                                                            {{row[2]}}
+                                                    </strong>
+                                                     = {{row[3]}} + {{row[4]}} + {{row[5]}} + {{row[6]}}
+                                                    {% if row[7] >= 0 %}
+                                                        + {{row[7]}}
+                                                    {% else %}
+                                                        - {{0-row[7]}}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-6">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>
+                                Reporter: {{master_mteams[sm_current_pair_scores[1][2][0][1]-1][1]}}
+                            </th>
+                            <th>
+                                Opponent: {{master_mteams[sm_current_pair_scores[1][2][1][1]-1][1]}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td>{{sm_current_pair_scores[1][2][0][4][1]}}</td>
+                            <td>{{sm_current_pair_scores[1][2][1][4][1]}}</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Juror</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in sm_current_pair_scores[1][2][0][3] %}
+                                            <tr><td> {{master_mjurors[row[1]-1][1]}} </td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </td>
+                            <td>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Scores</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in sm_current_pair_scores[1][2][0][3] %}
+                                            <tr>
+                                                <td>
+                                                    <strong>
+                                                        {{row[2]}}
+                                                    </strong>
+                                                     = {{row[3]}} + {{row[4]}} + {{row[5]}}
+                                                    {% if row[6] >= 0 %}
+                                                        + {{row[6]}}
+                                                    {% else %}
+                                                        - {{0-row[6]}}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Scores</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in sm_current_pair_scores[1][2][1][3] %}
+                                            <tr>
+                                                <td>
+                                                    <strong>
+                                                        {{row[2]}}
+                                                    </strong>
+                                                     = {{row[3]}} + {{row[4]}} + {{row[5]}} + {{row[6]}}
+                                                    {% if row[7] >= 0 %}
+                                                        + {{row[7]}}
+                                                    {% else %}
+                                                        - {{0-row[7]}}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr style="text-align: left">
+                            <td>Average</td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[0][2][0][5]}}
+                            </td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[0][2][1][5]}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Factor</td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[0][2][0][2][4]}}
+                                {% if sm_current_pair_scores[0][2][0][7] > 0 %}
+                                 - {{sm_current_pair_scores[0][2][0][7]}}
+                                {% endif %}
+                                {% if sm_current_pair_scores[0][2][0][2][6] > 0 %}
+                                    (*G1)
+                                {% endif %}
+                                {% if sm_current_pair_scores[0][2][0][2][7] > 0 %}
+                                    (*G2)
+                                {% endif %}
+                            </td>
+                            <td style="text-align: left">{{sm_current_pair_scores[0][2][0][2][5]}}</td>
+                        </tr>
+                        <tr>
+                            <td>Points</td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[0][2][0][6]}}
+                            </td>
+                            <td style="text-align: left">{{sm_current_pair_scores[0][2][1][6]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-6">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr style="text-align: left">
+                            <td>Average</td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[1][2][0][5]}}
+                            </td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[1][2][1][5]}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Factor</td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[1][2][0][2][4]}}
+                                {% if sm_current_pair_scores[1][2][0][7] > 0 %}
+                                 - {{sm_current_pair_scores[1][2][0][7]}}
+                                {% endif %}
+                                {% if sm_current_pair_scores[1][2][0][2][6] > 0 %}
+                                    (*G1)
+                                {% endif %}
+                                {% if sm_current_pair_scores[1][2][0][2][7] > 0 %}
+                                    (*G2)
+                                {% endif %}
+                            </td>
+                            <td style="text-align: left">{{sm_current_pair_scores[1][2][0][2][5]}}</td>
+                        </tr>
+                        <tr>
+                            <td>Points</td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[1][2][0][6]}}
+                            </td>
+                            <td style="text-align: left">
+                                {{sm_current_pair_scores[1][2][1][6]}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <h5>(Note: *G1: applied Group 1 problem rejection credit. *G2: applied Group 2 problem rejection credit.) </h5>
+{% endblock %}

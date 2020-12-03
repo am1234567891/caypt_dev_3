@@ -1,0 +1,620 @@
+{% extends "main/main_base_pdf.html" %}  {# main/main_base.html extends app_main_layout_pdf.html #}
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container" style="background-color: green; color: white;">
+        <div class="row">
+            <div class="col-lg-12" style="text-align: center;">
+                <h1>
+                Selective Match
+                {% if current_room_code > 0 %}
+                     - Room {{ master_mrooms[current_room_code-1][1] }}
+                     - Round {{sm_current_room_round_pairs[0]}}
+                     - Stage {{current_stage_code}}
+                {% endif %}
+                </h1>
+            </div>
+        </div>
+    </div>
+    <div class="container" style="background-color: white; color: black;">
+        <div class="row">
+            <div class="col-lg-4" style="text-align: right;">
+                <h2>Reporter</h2>
+                <div class="chip-{{sm_steps[step_number-1]['reporter']}}">
+                    <img src="/static/img/{{sm_steps[step_number-1]['reporter']}}.jpg" alt="Person" width="96" height="96">
+                    <!-- Reporter team_code: {{current_stage_agenda[2][0][1]}} -->
+                    {{ master_mteams[current_stage_agenda[2][0][1]-1][1]}} - {{current_stage_agenda[2][0][2][6]}}
+                </div>
+            </div>
+            <div class="col-lg-4" style="text-align: center;">
+                <h2>vs</h2>
+                <h4>
+                    {% for problem in current_stage_problems[1] %}
+                        {% if problem['problem_status'] == 3 %}
+                            {{ problem['problem_label'] }}
+                            {{ break }}
+                        {% endif %}
+                    {% endfor %}
+                </h4>
+            </div>
+            <div class="col-lg-4" style="text-align: left;">
+                <h2>Opponent</h2>
+                <div class="chip-{{sm_steps[step_number-1]['opponent']}}">
+                    <img src="/static/img/{{sm_steps[step_number-1]['opponent']}}.jpg" alt="Person" width="96" height="96">
+                    {{ master_mteams[current_stage_agenda[2][1][1]-1][1]}} - {{current_stage_agenda[2][1][2][6]}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container" style="background-color: white; color: black;">
+        <br>
+        <div class="row">
+            <div class="col-lg-3">
+                {% if step_number==2 %}
+                    {% for problem in current_stage_problems[1] %}
+                        {% if problem['problem_status'] == 1 %}
+                            <form class="form-inline" action="" method="POST">
+                                {{ form.hidden_tag() }}
+                                <input type="hidden" name="step" value="{{step_number + 1}}">
+                                <div class="chat-container">
+                                    <img src="/static/img/on.jpg" alt="Avatar" style="width:100%;" width="20">
+                                    <p>
+                                        I
+                                        <button type="submit" class="btn btn-success btn-sm" name="problem" value="{{problem['problem_code']}}--3"
+                                                onclick="return confirm('Are you sure? Please double check your data, it can not be re-do! DO NOT use the back button in the browser!')">
+                                            Accept
+                                        </button>
+                                        <button type="submit" class="btn btn-danger btn-sm" name="problem" value="{{problem['problem_code']}}--2"
+                                                onclick="return confirm('Are you sure? Please double check your data, it can not be re-do! DO NOT use the back button in the browser!')">
+                                            Reject
+                                        </button>
+                                        it. Thanks.
+                                    </p>
+                                    <span class="time-right">Reporter</span>
+                                </div>
+                            </form>
+                            {{ break }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="col-lg-6" style="text-align: center;">
+                <h3>Phase #{{step_number}} ( {{sm_steps[step_number-1]['step_mins']}} min(s) )</h3>
+                <P><font color="red">- {{sm_steps[step_number-1]['step_text']}}</font></P>
+            </div>
+            <div class="col-lg-3">
+                {% if step_number==2 %}
+                    {% for problem in current_stage_problems[1]%}
+                        {% if problem['problem_status'] == 1 %}
+                            <div class="chat-container darker">
+                                <img src="/static/img/off.jpg" alt="Avatar" class="right" style="width:100%;" width="30">
+                                <p>
+                                    Hey! I proposed {{problem['problem_label']}}. Do you accept it?
+                                </p>
+                                <span class="time-left">opponent</span>
+                            </div>
+                            {{ break }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% if step_number > total_steps %}
+            <h3> Well done! All phases are completed!</h3>
+        {% else %}
+            <div class="row" style="background-color: white; color: black;">
+                <div class="col-lg-12" style="text-align: center;">
+                    <h1><div id = "timerText">{{sm_steps[step_number-1]['step_mins']}} min(s) allocated</div></h1>
+                    <div class="progress">
+                        <div id = "percentage" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="background-color: white; color: black;">
+                <div class="col-lg-12" style="text-align: center;">
+                    <h3><div id = "timerText2"></div></h3>
+                    <div class="progress">
+                        <div id = "percentage2" class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="container" style="background-color: white; color: black;">
+        <BR>
+        <div class="row">
+            <div class="col-lg-12" style="text-align: center;">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" onclick="startTimer({{sm_steps[step_number-1]['step_mins']}})">Start</button>
+                    <button type="button" class="btn btn-default" onclick="stopTimer()">Stop</button>
+                    {% if step_number > 1 %}
+                        <a href="/sm_timing?step={{step_number - 1}}" class="btn btn-default">Previous Phase</a>
+                    {% endif %}
+                    {% if step_number < total_steps %}
+                        <a href="/sm_timing?step={{step_number + 1}}" class="btn btn-default">Next Phase</a>
+                    {% else %}
+                        <a href="/sm_timing?step={{step_number + 1}}" class="btn btn-warning" onclick="return confirm('Is the stage finished?')">Done</a>
+                    {% endif %}
+                    {% if step_number == 1 %}
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">Propose Problem</button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="myModal" role="dialog" style="text-align: left;">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Please select one problem</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="form-inline" action="" method="POST">
+                                            {{ form.hidden_tag() }}
+                                            <input type="hidden" name="step" value="{{step_number + 1}}">
+                                            <div class="alert alert-danger">
+                                                <strong>Caution! Once you click Submit, it can't be undo!.</strong>
+                                                If you have any questions, please contact Information Team ASAP.
+                                            </div>
+                                            <div>
+                                                {% if reporter_problems_rejected %}
+                                                    Reporter has already rejected
+                                                    {% if reporter_problems_rejected[0] %}
+                                                        {{reporter_problems_rejected[0][2]}} problems of Group {{reporter_problems_rejected[0][0]}}
+                                                    {% endif %}
+                                                    {% if reporter_problems_rejected[1] %}
+                                                        and {{reporter_problems_rejected[1][2]}} problems of Group {{reporter_problems_rejected[1][0]}}.
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                {% for problem in current_stage_problems[1] %}
+                                                    {% if problem['problem_status'] == 1 %}
+                                                        <br><input type="radio" disabled name="problem" value="{{problem['problem_code']}}--1">{{problem['problem_code']}} - {{ problem['problem_label']}}
+                                                        - <font color="red"> proposed</font>
+                                                    {% elif problem['problem_status'] == 2 %}
+                                                        <br><input type="radio" disabled name="problem" value="{{problem['problem_code']}}--2">{{problem['problem_code']}} - {{ problem['problem_label']}}
+                                                        - <font color="red"> rejected</font>
+                                                    {% else %}
+                                                    <br><input type="radio" name="problem" value="{{problem['problem_code']}}--1">{{problem['problem_code']}} - {{ problem['problem_label']}}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <BR><BR>
+                                            </div>
+                                            <button type="submit" class="btn btn-info" onclick="return confirm('Please double check your data, it can not be re-done! DO NOT use the back button in the browser! Are you sure?')">Submit</button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <p>Caution! Once you click Submit, it can't be undo!</p>
+                                        <p>Problem selection guide: <font color="red">{{sm_current_room_round_pairs[4]}}</font></p>
+                                    </div>
+                                    <div>
+                                        {% if problem_label_codes %}
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Problem</th>
+                                                        {% for item in problem_label_codes %}
+                                                            <th>{{item[0]}}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for team in team_problems %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if current_stage_agenda[2][0][1] == team[0] %}
+                                                                Rpt:
+                                                            {% else %}
+                                                                Opp:
+                                                            {% endif %}
+                                                            {{master_mteams[team[0]-1][1]}}
+                                                        </td>
+                                                        {% if sm_current_room_round_pairs[0] < 4 %}
+                                                            {% for problem in team[1][:5] %}
+                                                                <td>
+                                                                    {% if problem[1] %}
+                                                                        {% for item in problem [1][0]%}
+                                                                            R{{item[0]}}S{{item[2]}}-
+                                                                            {% if item[4] == 3 %}
+                                                                                Accepted
+                                                                            {% else %}
+                                                                                Rejected
+                                                                            {% endif %}
+                                                                            <BR>
+                                                                        {% endfor %}
+                                                                    {% else %}
+                                                                        -
+                                                                    {% endif %}
+                                                                </td>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            {% for problem in team[1][-5:] %}
+                                                                <td>
+                                                                    {% if problem[1] %}
+                                                                        {% for item in problem [1][0]%}
+                                                                            R{{item[0]}}S{{item[2]}}-
+                                                                            {% if item[4] == 3 %}
+                                                                                Accepted
+                                                                            {% else %}
+                                                                                Rejected
+                                                                            {% endif %}
+                                                                            <BR>
+                                                                        {% endfor %}
+                                                                    {% else %}
+                                                                        -
+                                                                    {% endif %}
+                                                                </td>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h4>Problem rules:</h4>
+                                        <p>The Opponent may challenge the Reporter on any problem with the exception for a problem that:</p>
+                                        <ul>
+                                            <li>
+                                                a) was rejected by the Reporter earlier;
+                                            </li>
+                                            <li>
+                                                b) was presented by the Reporter earlier;
+                                            </li>
+                                            <li>
+                                                c) was opposed by the Opponent earlier;
+                                            </li>
+                                            <li>
+                                                d) was presented by the Opponent earlier.
+                                            </li>
+                                        </ul>
+                                        <p>
+                                            If there are less than 2 problems left to challenge, the bans d), c), b), a) are successively removed, in this order.<BR>
+                                            During the Selective PMs, the Reporter may reject the challenge of 2 different problems in total without penalty.
+                                            Only one rejection is allowed from each group. For every subsequent rejection, the coefficient of the Reporter
+                                            (see section IX) is decreased by 0.2. This reduction continues to apply during the following selective PMs.
+                                            The maximal number of different problems a team is allowed to reject during the whole competition is 5.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if step_number == 3 %}
+                        {% if not current_stage_agenda[2][0][2][6] %}
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#teamMembers">Members</button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="teamMembers" role="dialog" style="text-align: left;">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">Please select team member:</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-inline" action="" method="POST">
+                                                {{ form.hidden_tag() }}
+                                                <input type="hidden" name="step" value="{{step_number}}">
+                                                <div class = "container">
+                                                    <div class="row">
+                                                        <div class="col-lg-3">
+                                                            <div class="form-group"> <!-- reporter mteam_code: {{current_stage_agenda[2][0][1]}} -->
+                                                                <label for="reporter">Reporter: {{ master_mteams[current_stage_agenda[2][0][1]-1][1]}} </label>
+                                                                <!-- school id: {{ master_mteams[current_stage_agenda[2][0][1]-1][2][8]}} -->
+                                                                <BR> School: {{ master_mteams[current_stage_agenda[2][0][1]-1][2][9]}}<BR>
+                                                                <select class="form-control" id="reporter" name="reporter">
+                                                                    <option selected value="0">Select....................</option>
+                                                                    {% for team_member in master_mteams[current_stage_agenda[2][0][1]-1][3] %}
+                                                                        <option value="{{team_member[0]}}--{{team_member[2]}}">{{team_member[2]}}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-3">
+                                                            <div class="form-group"> <!-- reporter mteam_code: {{current_stage_agenda[2][1][1]}} -->
+                                                                <label for="opponent">Opponent: {{ master_mteams[current_stage_agenda[2][1][1]-1][1]}} </label>
+                                                                <BR> School: {{ master_mteams[current_stage_agenda[2][1][1]-1][2][9]}}<BR>
+                                                                <select class="form-control" id="opponent" name="opponent">
+                                                                    <option selected value="0">Select....................</option>
+                                                                    {% for team_member in master_mteams[current_stage_agenda[2][1][1]-1][3] %}
+                                                                        <option value="{{team_member[0]}}--{{team_member[2]}}">{{team_member[2]}}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-lg-3">
+                                                            <table class="table table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Reporter Team Member<BR>Participation</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% if reporter_team_members_roles == 0 %}
+                                                                        <tr><td>No one participated at any stage yet.</td></tr>
+                                                                    {% else %}
+                                                                        {% for team_member in master_mteams[current_stage_agenda[2][0][1]-1][3] %}
+                                                                            {% if team_member[0] not in reporter_team_members_roles[3] %}
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        {{team_member[0]}}--{{team_member[2]}}
+                                                                                        <ul><li>Not yet</li></ul>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                        {% for team_member in reporter_team_members_roles[2] %}
+                                                                            <tr>
+                                                                                <td>
+                                                                                    {{team_member[0]}}--{{team_member[1]}}
+                                                                                    {% if team_member[2] == 1 %}
+                                                                                        (Captain)
+                                                                                    {% endif %}
+                                                                                    {% if team_member[4] == 3 %}
+                                                                                        <BR><font color="red">(3 times as reporter, can't be reporter anymore!)</font>
+                                                                                    {% endif %}
+                                                                                    <ul>
+                                                                                    {% for row in team_member[3] %}
+                                                                                        <li>
+                                                                                            Round {{row[7]}}{{row[6]}} Stage: {{row[1]}} -
+                                                                                            {% if row[2] == 1 %}
+                                                                                                <font color="red">Reporter</font>
+                                                                                            {% elif row[2] == 2 %}
+                                                                                                Opponent
+                                                                                            {% endif %}
+                                                                                            (Problem {{row[11]}})
+                                                                                        </li>
+                                                                                    {% endfor %}
+                                                                                    </ul>
+                                                                                </td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        <div class="col-lg-3">
+                                                            <table class="table table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Opponent Team Member<BR>Participation</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% if opponent_team_members_roles == 0 %}
+                                                                        <tr><td>No one participated at any stage yet.</td></tr>
+                                                                    {% else %}
+                                                                        {% for team_member in master_mteams[current_stage_agenda[2][1][1]-1][3] %}
+                                                                            {% if team_member[0] not in opponent_team_members_roles[3] %}
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        {{team_member[0]}}--{{team_member[2]}}
+                                                                                        <ul><li>Not yet</li></ul>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                        {% for team_member in opponent_team_members_roles[2] %}
+                                                                            <tr>
+                                                                                <td>
+                                                                                    {{team_member[0]}}--{{team_member[1]}}
+                                                                                    {% if team_member[2] == 1 %}
+                                                                                        (Captain)
+                                                                                    {% endif %}
+                                                                                    <ul>
+                                                                                    {% for row in team_member[3] %}
+                                                                                        <li>
+                                                                                            Round {{row[7]}}{{row[6]}} Stage: {{row[1]}} -
+                                                                                            {% if row[2] == 1 %}
+                                                                                                <font color="red">Reporter</font>
+                                                                                            {% elif row[2] == 2 %}
+                                                                                                Opponent
+                                                                                            {% endif %}
+                                                                                            (Problem {{row[11]}})
+                                                                                        </li>
+                                                                                    {% endfor %}
+                                                                                    </ul>
+                                                                                </td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <button type="submit" class="btn btn-info" onclick="return confirm('Are you sure?')">Submit</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <p style="color: red;">
+                                                No member of a team may take the floor more than twice during one Selective PM or,<BR>
+                                                as Reporter, more than three times in total during all Selective PMs.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="row" style="background-color: green; color: white;">
+            <div class="col-lg-12" style="text-align: center;">
+                <h1>
+                </h1>
+        </div>
+    </div>
+    {% if problem_label_codes %}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Problem</th>
+                                {% for item in problem_label_codes %}
+                                    <th>{{item[0]}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in team_problems %}
+                            <tr>
+                                <td>
+                                    {% if current_stage_agenda[2][0][1] == team[0] %}
+                                        Rpt:
+                                    {% else %}
+                                        Opp:
+                                    {% endif %}
+                                    {{master_mteams[team[0]-1][1]}}
+                                </td>
+                                {% if sm_current_room_round_pairs[0] < 4 %}
+                                    {% for problem in team[1][:5] %}
+                                        <td>
+                                            {% if problem[1] %}
+                                                {% for item in problem [1][0]%}
+                                                    R{{item[0]}}S{{item[2]}}-
+                                                    {% if item[4] == 3 %}
+                                                        Accepted
+                                                    {% else %}
+                                                        Rejected
+                                                    {% endif %}
+                                                    <BR>
+                                                {% endfor %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for problem in team[1][-5:] %}
+                                        <td>
+                                            {% if problem[1] %}
+                                                {% for item in problem [1][0]%}
+                                                    R{{item[0]}}S{{item[2]}}-
+                                                    {% if item[4] == 3 %}
+                                                        Accepted
+                                                    {% else %}
+                                                        Rejected
+                                                    {% endif %}
+                                                    <BR>
+                                                {% endfor %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-6">
+                    Problem selection guide: <font color="red">{{sm_current_room_round_pairs[4]}}</font>
+                    <h4>Problem rules:</h4>
+                    <p>The Opponent may challenge the Reporter on any problem with the exception for a problem that:</p>
+                    <ul>
+                        <li>
+                            a) was rejected by the Reporter earlier;
+                        </li>
+                        <li>
+                            b) was presented by the Reporter earlier;
+                        </li>
+                        <li>
+                            c) was opposed by the Opponent earlier;
+                        </li>
+                        <li>
+                            d) was presented by the Opponent earlier.
+                        </li>
+                    </ul>
+                    <p>
+                        If there are less than 2 problems left to challenge, the bans d), c), b), a) are successively removed, in this order.<BR>
+                        During the Selective PMs, the Reporter may reject the challenge of 2 different problems in total without penalty.
+                        Only one rejection is allowed from each group. For every subsequent rejection, the coefficient of the Reporter
+                        (see section IX) is decreased by 0.2. This reduction continues to apply during the following selective PMs.
+                        The maximal number of different problems a team is allowed to reject during the whole competition is 5.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <script>
+        var mins;  //Set the number of minutes you need
+        var secs;
+        var psecs;
+        var currentSeconds;
+        var currentMinutes;
+        var is_overtime;
+        var total_over_mins;
+        var myVar;
+
+        function startTimer(maxMins) {
+            mins = maxMins;
+            secs = mins * 60;
+            psecs = mins * 60;
+            currentSeconds = 0;
+            currentMinutes = 0;
+            is_overtime = 0;
+            total_over_mins = 0;
+            myVar = setTimeout(Decrement,1000);
+        }
+
+        function Decrement() {
+            currentMinutes = Math.floor(secs / 60);
+            currentSeconds = secs % 60;
+            if(currentSeconds <= 9) currentSeconds = "0" + currentSeconds;
+            secs--;
+
+            /* determine what to show on the timerText*/
+            if (is_overtime < 1) {
+                document.getElementById("timerText").innerHTML = currentMinutes + "m : " + currentSeconds + "s "; //Set the element id you need the time put into.
+            } else {
+                document.getElementById("timerText2").innerHTML = "Overtime: " + (total_over_mins - currentMinutes -1) + "m : " + (60 - currentSeconds) + "s "; //Set the element id you need the time put into.
+            }
+
+            if(secs !== -1) {
+                myVar=setTimeout('Decrement()',1000);
+            } else {
+                /* alert(secs, psecs, currentMinutes, currentSeconds) */
+                secs = psecs;
+                myVar=setTimeout('Decrement()',1000);
+                total_over_mins = total_over_mins + mins;
+                is_overtime = is_overtime + 1
+                if (is_overtime > 1) document.getElementById("percentage2").className = "progress-bar progress-bar-danger progress-bar-striped active";
+                else document.getElementById("percentage2").className = "progress-bar progress-bar-warning progress-bar-striped active";
+            }
+
+            /* determine the progress percentage:
+             * if within regular timeframe, show % at the first progress bar
+             * otherwise show % at the 2nd progress bar, the % is continue to grow
+            */
+            if (is_overtime < 1) {
+                document.getElementById("percentage").innerHTML = parseInt((psecs-secs)/psecs * 100) + "%";
+                document.getElementById("percentage").style.width = (psecs-secs)/psecs * 100 + "%";
+            } else {
+                document.getElementById("percentage2").innerHTML = parseInt(((psecs-secs)/psecs + is_overtime -1) * 100) + "%";
+                document.getElementById("percentage2").style.width = (psecs-secs)/psecs * 100 + "%";
+            }
+        }
+
+        function stopTimer() {
+            clearTimeout(myVar);
+        }
+
+    </script>
+
+{% endblock %}

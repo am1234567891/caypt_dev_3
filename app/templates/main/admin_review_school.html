@@ -1,0 +1,51 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Administration Dashboard
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+    <hr>
+    <h3>School Review</h3>
+    <BR><BR>
+
+    <form action="" method="post" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <span class="d-block bg-info">
+                        All fields are mandatory. <BR>
+                    </span>
+                    <div class="form-group">
+                        {{ render_field(form.school_id, readonly=true, tabindex=330) }}
+                        {{ render_field(form.school_name, tabindex=340) }}
+                        {{ render_field(form.address, tabindex=350) }}
+                        {{ render_field(form.country, tabindex=360) }}
+                        {{ render_field(form.province, tabindex=370) }}
+                        {{ render_field(form.city, tabindex=380) }}
+                        {{ render_field(form.postal_code, tabindex=390) }}
+                        {{ render_field(form.school_status, tabindex=400) }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <br><hr>
+                {{ render_submit_field(form.submit, tabindex=410) }}
+            </div>
+        </div>
+    </form>
+{% endblock %}

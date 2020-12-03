@@ -1,0 +1,173 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Tournament Admin Management
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+
+        <div class="alert alert-danger">
+          <strong>Danger!</strong> Only one administrator can work on the planning at the same point of time.
+            <BR>Please ensure that the <strong>add/update team and participant functions are all closed properly</strong>
+            . If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="/admin_mgmt">View Plan</a></li>
+            <li class="active"><a href="#">Plan Final Matches</a></li>
+            <li><a href="/publish">Publish</a></li>
+            <li><a href="/sm_problem">SM Problem</a></li>
+        </ul>
+        <br>
+    </div>
+    <form class="form-inline" action="" method="POST">
+        {{ form.hidden_tag() }}
+        <input type="hidden" name="sm_plan_id" value="{{sm_plan_id}}">
+        <input type="hidden" name="fm_round_id" value="{{fm_round[2]}}">
+        <input type="hidden" name="fm_round_code" value="{{fm_round[1]}}">
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3>Final Match Planning - Round: {{fm_round[1]}}</h3>
+                </div>
+                <div class="col-lg-6">
+                    <BR><button type="submit" class="btn btn-info" onclick="return confirm('Please double check your data, it can not be re-do! DO NOT use the back button in the browser! Are you sure?')">Submit</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <h5>Please select the top three teams.</h5>
+                </div>
+                <div class="col-lg-4">
+                    <h5>Please select the room number.</h5>
+                </div>
+                <div class="col-lg-4">
+                    <h5>Please select the jurors.</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Selective Match Teams' Ranking</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in sm_team_rank %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="fm_teams" name="fm_teams" value="{{team[1]}}--{{team[0]}}--{{master_mteams[team[0]-1][2][8]}}">
+                                        #{{loop.index}}: {{master_mteams[team[0]-1][1]}} - {{team[2]}} - (for {{team[4]}} rounds)
+                                        <BR>{{master_mteams[team[0]-1][2][9]}}, {{master_mteams[team[0]-1][2][10]}}, {{master_mteams[team[0]-1][2][11]}}
+                                        <BR>{{team[1]}}--{{team[0]}}--{{master_mteams[team[0]-1][2][8]}}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label for="fm_room">Room No.</label>
+                        <select class="form-control" id="fm_room" name="fm_room">
+                            <option value="0" selected>Please select...</option>
+                            {% for room in master_mrooms %}
+                                <option value="{{room[2][11]}}">Room {{room[1]}}</option>
+                            {% endfor %}
+                        </select>
+                    </div><BR><BR>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Volunteers</th>
+                                <th>Conflict of Interest</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in master_room_mvolunteers %}
+                                <tr bgcolor="lighblue">
+                                    <td>Room {{room[1]}}</td>
+                                    <td></td>
+                                </tr>
+                                {% for volunteer in room[2] %}
+                                    <tr>
+                                        <td>
+                                            {{volunteer[1]}} - {{ volunteer[2]}}
+                                            {% if volunteer[3][6] == "Yes" %}
+                                                (Data Entry)
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if volunteer[4] == 0 %}
+                                                <ul><li>no</li></ul>
+                                            {% else %}
+                                                <ul>
+                                                {% for cois in volunteer[5] %}
+                                                    <li>
+                                                        {{cois[1]}}, {{cois[2]}}, {{cois[3]}}
+                                                    </li>
+                                                {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-4">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Jurors</th>
+                                <th>Conflict of Interest</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for juror in master_mjurors %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="jury" name="jury" value="{{juror[2][2]}}--{{juror[0]}}">
+                                        {{juror[2][2]}}--{{juror[0]}} - {{ juror[1]}}
+                                        {% if juror[2][7] == "Yes" %}
+                                            (Chair)
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if juror[3] == 0 %}
+                                            <ul><li>no</li></ul>
+                                        {% else %}
+                                            <ul>
+                                            {% for cois in juror[4] %}
+                                                <li>
+                                                    {{cois[1]}}, {{cois[2]}}, {{cois[3]}}
+                                                </li>
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

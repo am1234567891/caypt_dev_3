@@ -1,0 +1,58 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    {% if fm_plan_sub_status > 0 %}
+        <h2>Rank</h2>
+    {% else %}
+        <h2>Rank in Progress</h2> - Note: This is NOT the final ranking, some teams may have scores that are not recorded yet.
+    {% endif %}
+{% endblock %}
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+    <div class="container mt-3">
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">Final</a></li>
+            <li><a href="/rank_round">Team by Round</a></li>
+        </ul>
+        <br>
+    </div>
+    <div class = "container">
+        <div class="row">
+            <div class="col-lg-3">
+                <h2>Final Ranking</h2>
+            </div>
+            <div class="col-lg-6">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Team Ranking</th>
+                            <th>Team Name</th>
+                            <th>TSP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for team in fm_team_rank %}
+                            <tr>
+                                <td>#{{loop.index}}</td>
+                                <td>
+                                    {{master_mteams[team[2]-1][1]}}
+                                    {% if loop.index < 2 and team[3]>0 %}
+                                        <font color="gold" size="5">★</font>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{team[3]}}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-3">
+            </div>
+        </div>
+    </div>
+{% endblock %}

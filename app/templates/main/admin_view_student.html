@@ -1,0 +1,102 @@
+{% extends "main/main_base_bi.html" %}  {# main/main_base_chart.html extends app_main_layout_bi.html #}
+
+{% block page_title %}
+    Administration Dashboard
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block body %}
+    {{ super() }}
+    <hr>
+    <h3>Student Registration</h3>
+    <h4>Students that are {{ student_status }}</h4>
+
+    <BR><BR>
+    {% if students_count > 0 %}
+        <div class="container">
+            <input class="form-control" id="myInput" style="width: 50%; float: left" type="text" placeholder="Type your word to filter..">
+            <button class="btn btn-default toggle-all" style="float: right">Toggle - Open All</button>
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                          <th>Student Name</th>
+                          <th>Birth Date</th>
+                          <th>Is Captain</th>
+                          <th>Student Status</th>
+                          <th>Team School</th>
+                          <th>Team Name</th>
+                          <th>Team Lead</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for row in student_list %}
+                            <tr>
+                                <td> {{ row[2] }} - {{ row[20] }} - {{ row[21] }} </td>
+                                <td> {{ row[23] }} </td>
+                                <td>
+                                   {% if row[4] == 1 %}
+                                        Captain
+                                   {% endif %}
+                                </td>
+                                <td>
+                                   {{ row[5] }}
+                                    {% if row[5] == 'Requested' %}
+                                        on {{ row[24] }}
+                                    {% endif %}
+                                </td>
+                                <td> {{ row[11] }} - {{ row[13] }} - {{ row[14] }} </td>
+                                <td> {{ row[8] }} </td>
+                                <td> {{ row[17] }} - {{ row[18] }} - {{ row[19] }} </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+
+<script>
+
+$('.toggle-all').click(function(){
+
+    if ($(this).data("lastState") === null || $(this).data("lastState") === 0) {
+        $('.collapse.in').collapse('hide');
+        $(this).data("lastState",1);
+        $(this).text("Toggle - Open All");
+    }
+    else {
+
+        $('.panel-collapse').removeData('bs.collapse')
+        .collapse({parent:false, toggle:false})
+        .collapse('show')
+        .removeData('bs.collapse')
+        .collapse({parent:'#accordion', toggle:false});
+
+        $(this).data("lastState",0);
+        $(this).text("Toggle - Close All");
+    }
+
+});
+
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+</script>
+
+{% endblock %}

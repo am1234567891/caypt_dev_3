@@ -1,0 +1,107 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Stage Management - Room A
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+          <li><a href="/admin">Planning</a></li>
+          <li><a href="#">Report (coming soon)</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <div class="alert alert-danger">
+            <strong>Caution! Please do NOT share your account with others.</strong>
+            If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">Select Match</a></li>
+            <li><a href="#">Draw</a></li>
+            <li><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li><a href="#">Enter Scores</a></li>
+        </ul>
+    </div>
+    <div class = "container">
+        <h3>Select Match</h3>
+        <div class="row">
+            <div class="col-lg-10">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round #</th>
+                            <th>Match Type</th>
+                            <th>Stage 1</th>
+                            <th>Stage 2</th>
+                            <th>Stage 3</th>
+                            <th>Scheudled Teams (Alphabet Order) </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Round 1</td>
+                            <td>Selective Match</td>
+                            <td><span style='font-size:18px; color:green'>&#9989;</span></td>
+                            <td><span style='font-size:18px; color:green'>&#9989;</span></td>
+                            <td>-</td>
+                            <td>Adljs, Bkjljl</td>
+                        </tr>
+                        <tr>
+                            <td><a href="/stage_draw">Round 2</a></td>
+                            <td>Selective Match</td>
+                            <td></td>
+                            <td></td>
+                            <td>-</td>
+                            <td>RHHS, UTS</td>
+                        </tr>
+                        <tr>
+                            <td>Round 3</td>
+                            <td>Selective Match</td>
+                            <td></td>
+                            <td></td>
+                            <td>-</td>
+                            <td>jdjfj, vkljl</td>
+                        </tr>
+                        <tr>
+                            <td>Round 4</td>
+                            <td>Selective Match</td>
+                            <td></td>
+                            <td></td>
+                            <td>-</td>
+                            <td>Sljj, Tkjljl</td>
+                        </tr>
+                        <tr>
+                            <td>Round 5</td>
+                            <td>Selective Match</td>
+                            <td></td>
+                            <td></td>
+                            <td>-</td>
+                            <td>Hkdjsd, Jkjljjl</td>
+                        </tr>
+                        <tr>
+                            <td>Round 6</td>
+                            <td>Final Match</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>TBD</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

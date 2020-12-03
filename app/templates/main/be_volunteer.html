@@ -1,0 +1,46 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}Be Volunteer{% endblock %}
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+{% block body %}
+    {{ super() }}
+    <div class="container mt-3">
+        <h3>Declare Conflict of Interest</h3>
+    </div>
+    <form action="" method="post" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <span class="d-block bg-info">
+                        Please select your availabilities.
+                    </span>
+                    <br><input type="checkbox" name="timeslot" value="1">{{two_day_timeslots['1']}}
+                    <br><input type="checkbox" name="timeslot" value="2">{{two_day_timeslots['2']}}
+                    <br><input type="checkbox" name="timeslot" value="3">{{two_day_timeslots['3']}}
+                    <br><input type="checkbox" name="timeslot" value="4">{{two_day_timeslots['4']}}
+                    <br>
+                    <br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <span class="d-block bg-info">
+                        Which school do you have a conflict of interest with? <BR>
+                        Please select the schools that you have a conflict of interest with if applicable.<BR>
+                    </span>
+
+                    {% for school in school_list %}
+                        <br><input type="checkbox" name="school" value="{{school[0]}}">{{school[1]}}
+                    {% endfor %}
+
+                </div>
+            </div>
+            <div class="row">
+                <br><hr>
+                {{ render_submit_field(form.submit, tabindex=290) }}
+            </div>
+        </div>
+    </form>
+
+{% endblock %}

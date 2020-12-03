@@ -1,0 +1,70 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    {% if fm_plan_sub_status > 0 %}
+        <h2>Rank</h2>
+    {% else %}
+        <h2>Rank in Progress</h2> - Note: This is NOT the final ranking, some teams may have scores that are not recorded yet.
+    {% endif %}
+{% endblock %}
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+    <div class="container mt-3">
+
+        <ul class="nav nav-tabs">
+            <li><a href="/rank_final">Final</a></li>
+            <li class="active"><a href="#">Team By Round</a></li>
+        </ul>
+        <br>
+    </div>
+    <div class = "container">
+        <div class="row">
+            <div class="col-lg-2">
+            </div>
+            <div class="col-lg-8">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Team Ranking</th>
+                            <th>Team Name</th>
+                            <th>TSP</th>
+                            <th>    </th>
+                            <th>Round 1</th>
+                            <th>Round 2</th>
+                            <th>Round 3</th>
+                            <th>Round 4</th>
+                            <th>Round 5</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for team in sm_team_rank %}
+                            <tr>
+                                <td>#{{loop.index}}</td>
+                                <td>
+                                    {{master_mteams[team[0]-1][1]}}
+                                    {% if loop.index < 4 and team[2]>0 %}
+                                        <font color="gold" size="5">★</font>
+                                    {% else %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{team[2]}}
+                                </td>
+                                <td>    </td>
+                                {% for round in team[6] %}
+                                    <td bgcolor="lightblue">
+                                        {{round[1]}}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+    </div>
+{% endblock %}

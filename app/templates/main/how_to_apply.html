@@ -1,0 +1,119 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}How to Apply{% endblock %}
+{% block body %}
+    {{ super() }}
+    
+        <p>(click each header to exapnd/collapse)</p>
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#purpose"><h4>1. Purpose and Motivation</h4></he></div>
+                <div class="panel-body" id="purpose" class="collapse">
+                    The CaYPT Management System, abbreviated as CaYPTMS in the remaining sections of the document, is a web-based application to facilitate the registration, scheduling, room assignment, and score calculation of the Canadian Young Physicists Tournament. It allows the CaYPT committee to move away from the classic Google Form and spreadsheet-style of management. This shift allows the committee to adapt to the growing student participation and makes the CaYPT accessible to more students.<br><br>
+                    The CaYPTMS is inspired by IYPTcc system adapted by the International Young Physicists’ Tournament since 2017. CaYPTMS and IYPTcc are similar in purpose but is independently developed by the CaYPT Information Team consisting of Andrew Mao and Frank Lai.<br><br>
+                    The CaYPTMS project is developed in three phases.
+                    <ul>
+                        <li>Phase 1 is the registration and role approval module.</li>
+                        <li>Phase 2 consists of room assignment and general planning software.</li>
+                        <li>Phase 3 automates the scoring system.</li>
+                    </ul>
+                    If you have any suggestions on how we can improve CaYPTMS, please let us know by sending an email to caypt@stemfellowship.org<br><br>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#layout"><h4>2. General Layout</h4></div>
+                <div class="panel-body" id="layout" class="collapse">
+                    Everyone that participates in the CaYPT is required to register through CaYPTMS. There are 4 roles that one could register as. They are team member(competitor), team leader(teacher or any other adult), juror and volunteer.<br><br>
+                    The registration and role approval process for each of the 4 roles can be found in Section 3 and 4.<br><br>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#registration"><h4>3. Registration</h4></div>
+                <div class="panel-body" id="registration" class="collapse">
+                    <div class = "container">
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <h4>Eligibility</h4>
+                                <b>Team Member</b><br>
+                                To register to be a team member you must be under the age of 19.<br>
+                                <br><b>Team Leader</b><br>
+                                To register to be a team leader you must be over the age of 18.<br>
+                                <br><b>Juror</b><br>
+                                To register to be a juror you must be over the age of 20.<br>
+                                <br><b>Volunteer</b><br>
+                                To register to be a volunteer you must be over the age of 14.<br>
+                            </div>
+                            <div class="col-lg-5">
+                                <h4>Common Registration Process</h4>
+                                <ul>
+                                    <li>Step 1: Click <a href="https://caypt.pythonanywhere.com/user/sign-in">Sign in</a> on the top right hand corner of the home page</li>
+                                    <li>Step 2: Click <a href="https://caypt.pythonanywhere.com/user/register">New here? Register</a> located above the email field.</li>
+                                    <li>Step 3: Filling in all the required information and click Register.</li>
+                                    <li>Step 4: Go to your email account and verify your email. Make sure to check this email address
+                                        regularly. The CaYPT committee will send out information regarding the tournament via email.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#role"><h4>4. Creating a Team and Role Approval</h4></div>
+                <div class="panel-body" id="role" class="collapse">
+                    <br><b>Team Member</b><br><br>
+                    To enroll in a team you should contact your team leader to ensure that a team has been created. (Team member status must be approved by your team leader)<br>
+                    <ul>
+                        <li>Step 1: Click <font color="blue">join a team as a team member</font></li>
+                        <li>Step 2: Select your school in the drop-down menu. If your school is not on the list, please contact your team leader.</li>
+                        <li>Step 3: Click Submit</li>
+                        <li>Step 4: Check back to see whether your team leader have approved your request</li>
+                    </ul>
+                    <br><b>Team Leader</b><br><br>
+                    Creating a team (teams are automatically approved)<br>
+                    <ul>
+                        <li>Step 1: Click <font color="blue">create your own team as a team lead</font></li>
+                        <li>Step 2: If you already made a team for your school before, you only need to fill in the
+                            team name and teleconference option for your second team. If this is your first team,
+                            you should fill-in the school information
+                        </li>
+                        <li>Step 3: Click Submit</li>
+                    </ul>
+                    <br>Approve Students<br><br>
+                    After you create a team, you can approve or reject students or assign one student as the team captain.<br>
+                    <br><b>Juror</b><br><br>
+                    (Juror status must be approved by CaYPT administrator)<br>
+                    <ul>
+                        <li>Step 1: Click <font color="blue">Join as a Juror</font></li>
+                        <li>Step 2: Select your availability and teleconference option</li>
+                        <li>Step 3: Select the schools that you have a conflict of interest with</li>
+                        <li>Step 4: Click Submit</li>
+                    </ul>
+                    <br><b>Volunteer</b><br><br>
+                    (Volunteers are automatically approved)<br>
+                    <ul>
+                        <li>Step 1: Click <font color="blue">Join as a volunteer</font></li>
+                        <li>Step 2: Select your availability</li>
+                        <li>Step 3: Select the schools that you have a conflict of interest with</li>
+                        <li>Step 4: Click Submit</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#room"><h4>5. Automatic Room Assignment</h4></div>
+                <div class="panel-body" id="room" class="collapse">
+                    Teams, jurors and volunteers will be assigned to rooms based on their availability, conflict of interest and teleconference status.<br><br>
+                    We aim to allow teams to meet the maximum number of team and jurors during the tournament.<br><br>
+                    More details regarding room assignment will be published in a later edition of this document.<br><br>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#score"><h4>6. Automatic Score Computation</h4></div>
+                <div class="panel-body" id="score" class="collapse">
+                    More details regarding automatic score computation will be published in a later edition of this document.<BR>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

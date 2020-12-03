@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>{{ user_manager.USER_APP_NAME }}</title>
+    <style>
+        .nav-tabs > li > a{
+          color: #357EC7;
+        }
+    @page {
+        size: Letter;
+        margin: 0in 0.44in 0.2in 0.44in;
+    }
+    .chip-on {
+      display: inline-block;
+      padding: 0 25px;
+      height: 50px;
+      color: black;
+      font-size: 16px;
+      line-height: 50px;
+      border-radius: 25px;
+      background-color: #f1f1f1;
+    }
+
+    .chip-on img {
+      float: left;
+      margin: 0 10px 0 -25px;
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+    }
+
+    .chip-off {
+      display: inline-block;
+      padding: 0 25px;
+      height: 50px;
+      color: #737373;
+      font-size: 16px;
+      line-height: 50px;
+      border-radius: 25px;
+      background-color: #bfbfbf;
+    }
+
+    .chip-off img {
+      float: left;
+      margin: 0 10px 0 -25px;
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+    }
+
+    .chat-container {
+        border: 2px solid #dedede;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .darker {
+        border-color: #ccc;
+        background-color: #ddd;
+    }
+
+    .chat-container::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    .chat-container img {
+        float: left;
+        max-width: 60px;
+        width: 100%;
+        margin-right: 20px;
+        border-radius: 50%;
+    }
+
+    .chat-container img.right {
+        float: right;
+        margin-left: 20px;
+        margin-right:0;
+    }
+
+    .time-right {
+        float: right;
+        color: #aaa;
+    }
+
+    .time-left {
+        float: left;
+        color: #999;
+    }
+
+    </style>
+
+    {# *** Allow sub-templates to insert extra html to the head section *** #}
+    {% block extra_css %}{% endblock %}
+  </head>
+
+
+<body>
+
+    <div id="main-div" class="with-margins">
+    {# One-time system messages called Flash messages #}
+    {% block flash_messages %}
+        {%- with messages = get_flashed_messages(with_categories=true) -%}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category=='error' %}
+                        {% set category='danger' %}
+                    {% endif %}
+                    <hr class="no-margins"/>
+                    <div class="alert alert-{{category}}">{{ message|safe }}</div>
+                {% endfor %}
+            {% endif %}
+        {%- endwith %}
+    {% endblock %}
+
+    <div class="container">
+
+      <h1>{% block page_title %}{% endblock %}</h1>
+
+      <p>{% block body %}{% endblock %}</p>
+
+    </div>
+
+
+    <div class='container'>
+        <br/>
+        <hr class="no-margins"/>
+        <div id="footer-div" class="clearfix with-margins">
+            <div class="pull-left">{{ user_manager.USER_APP_NAME }}</div>
+            <div class="pull-right">&copy; 2019</div>
+        </div>
+    </div>
+  </body>
+</html>

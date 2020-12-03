@@ -1,0 +1,318 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}Member Dashboard <HR>{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+     <div class="container mt-3">
+        {% if led_teams_count<1 and joined_teams_count<1 and myparticipation_count<1 %}
+            {% if member_editable %}
+                <h2>My Team</h2>
+                <HR>
+                <span class="d-block bg-info">
+                    You ({{ member_age }} years old, education background: {{ my_background_text }}) don't have team yet. You can:
+                </span>
+                <ui>
+                    {% if member_age < 19 %}
+                        <li><a href="{{ url_for('main.join_team') }}">join a team as a team member</a> or </li>
+                    {% endif %}
+                    {% if member_age >= 18 %}
+                        <li><a href="{{ url_for('main.register_team') }}">create your own team as a team lead</a> or </li>
+                    {% endif %}
+                    {% if member_age >= 20 and my_background >= 20 %}
+                        <li><a href="{{ url_for('main.be_juror') }}">Join as a Juror</a> or </li>
+                    {% endif %}
+                    {% if member_age >= 14 %}
+                        <li><a href="{{ url_for('main.be_volunteer') }}">Join as a Volunteer</a></li>
+                    {% endif %}
+                </ui>
+            {% else %}
+                <h2>Registration for CaYPT2021 has been closed, see you in 2022!</h2>
+            {% endif %}
+        {% else %}
+            {% if led_teams_count > 0 %}
+                <h2>Team(s) that I led</h2>
+                <HR>
+                {% if member_editable and myparticipation_count <1 and member_age >= 20 and my_background >= 20 %}
+                    <div class="container">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4>
+                                    Team Leads are encouraged to <a href="{{ url_for('main.be_juror_as_tl') }}?school={{ form.school_id.data }}">be a Juror</a>
+                                    <!-- <a href="{{ url_for('main.be_juror') }}" class="btn btn-info">Join as a Juror</a> -->
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if member_editable and led_teams_count < 2 %}
+                    <div class="container">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">You can add one more team for your school: {{ form.school_name.data }}</div>
+                            <div class="panel-body">
+                                <form action="" method="post" class="form" role="form" class="form-horizontal">
+                                    {{ form.hidden_tag() }}
+                                    <input id="school_id" name="school_id" type="hidden" value="{{ form.school_id.data }}">
+                                    <div class="form-group">
+                                        <div class="col-xs-2 text-right">
+                                            <label class="control-label">{{ form.team_name.label }}:</label>
+                                        </div>
+                                        <div class="required col-xs-4" >
+                                            <input id="team_name" name="team_name" class="form-control" required="true">
+                                            <!-- enforced to be Yes due to COVID-19 pandemic for CaYPT 2021
+                                            <h4>{{ form.teleconferencing.label }}</h4>
+                                            <p>{{ form.teleconferencing }}</p>
+                                            -->
+                                            <input id="teleconferencing" name="teleconferencing" type="hidden" value="Yes">
+                                        </div>
+                                        <div class="required col-xs-4" >
+                                            {{ render_submit_field(form.submit, tabindex=290) }}
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <span class="d-block bg-info">
+                        You can not create more than two teams for your school.<BR>
+                    </span>
+                {% endif %}
+                <table class="table medium">
+                    <thead>
+                        <tr>
+                          <th>Team Name</th>
+                          <th>Team Status</th>
+                          <th>School Name</th>
+                          <th>Teleconferencing?</th>
+                          <th>Team Members</th>
+                        </tr>
+                    </thead>
+                    {% for row in led_teams_list %}
+                        <tr>
+                           <td> {{ row[1] }} </td>
+                           <td>
+                               {{ row[2] }}
+                                {% if row[2] == 'Requested' %}
+                                    on {{ row[8] }}
+                                {% endif %}
+
+                           </td>
+                           <td>  {{ row[3] }} </td>
+                           <td>  {{ row[11] }} </td>
+                           <td>
+                               {% if row[5] > 0 %}
+                                <table class="table medium">
+                                    <thead>
+                                        <tr>
+                                          <th>Member Name</th>
+                                          <th>Member Status</th>
+                                          <th>DoB</th>
+                                          <th>Is Captain</th>
+                                          <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    {% for member in row[6] %}
+                                        <tr>
+                                            <td>
+                                                {{ member[4] }} {{ member[5] }}
+                                            </td>
+                                            <td>
+                                                {{ member[3] }}
+                                                {% if member[3] == 'Requested' %}
+                                                    on {{ member[8] }}<BR>
+                                                    {% if member_editable %}
+                                                    <div class="btn-group">
+                                                        {% if row[9] < 1 %}
+                                                            <a href="{{ url_for('main.team_member_approval') }}?type=approve&captain=1&lead_id={{row[10]}}&member_id={{ member[0] }}&member_name={{ member[4] }}.{{ member[5] }}" class="btn btn-warning">Approve as Captain</a>
+                                                        {% endif %}
+                                                        {% if row[12] < 5 %}
+                                                            <a href="{{ url_for('main.team_member_approval') }}?type=approve&captain=0&lead_id={{row[10]}}&member_id={{ member[0] }}&member_name={{ member[4] }}.{{ member[5] }}" class="btn btn-info">Approve</a>
+                                                        {% endif %}
+                                                        <a href="{{ url_for('main.team_member_approval') }}?type=reject&captain=0&lead_id={{row[10]}}&member_id={{ member[0] }}&member_name={{ member[4] }}.{{ member[5] }}" class="btn btn-primary">Reject</a>
+                                                    </div>
+                                                    {% endif %}
+                                                {% elif member[3] == 'Approved' %}
+                                                    {% if member_editable %}
+                                                    <div class="btn-group">
+                                                        <a href="{{ url_for('main.team_member_approval') }}?type=reject&captain=0&lead_id={{row[10]}}&member_id={{ member[0] }}&member_name={{ member[4] }}.{{ member[5] }}" class="btn btn-primary">Reject</a>
+                                                    </div>
+                                                    {% endif %}
+                                                {% elif member[3] == 'Rejected' %}
+                                                    {% if member_editable %}
+                                                    <div class="btn-group">
+                                                        <a href="{{ url_for('main.team_member_approval') }}?type=approve&captain=0&lead_id={{row[10]}}&member_id={{ member[0] }}&member_name={{ member[4] }}.{{ member[5] }}" class="btn btn-info">Re-Approve</a>
+                                                    </div>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ member[7] }}
+                                            </td>
+                                            <td>
+                                                {% if member[2] == 1 %}
+                                                    Captain
+                                                {% else %}
+                                                    {% if row[9] < 1 and member[3] == 'Approved' %}
+                                                        <a href="{{ url_for('main.team_member_approval') }}?type=approve&captain=1&lead_id={{row[10]}}&member_id={{ member[0] }}&member_name={{ member[4] }}.{{ member[5] }}" class="btn btn-warning">Assign as Captain</a>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ member[6] }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tr>
+                                </table>
+                               {% else %}
+                                    No team member yet
+                               {% endif %}
+                           </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            {% if joined_teams_count > 0 %}
+                <h2>Team that I joined</h2>
+                <HR>
+                <span class="d-block bg-info">
+                    You can only join one team for current year.<BR>
+                </span>
+                <table class="table medium">
+                    <thead>
+                        <tr>
+                          <th>School Name</th>
+                          <th>Team Name</th>
+                          <th>My Status</th>
+                          <th>Is Captain</th>
+                          <th>Team Lead Name</th>
+                          <th>Team Lead Email</th>
+                        </tr>
+                    </thead>
+                    {% for item in joined_teams_list %}
+                        <!-- EVENT_ID, EVENT_NAME, TEAM_MEMBER_ID, TEAM_MEMBER_USER_ID, IS_CAPTAIN, MEMBER_STATUS, COMMENTS, 0-6
+                        TEAM_ID, TEAM_NAME, TEAM_STATUS, SCHOOL_ID, SCHOOL_NAME, SCHOOL_ADDRESS, SCHOOL_CITY, SCHOOL_PROVINCE, SCHOOL_COUNTRY, 7-15
+                        TEAM_LEAD_ID, TEAM_LEAD_FIRST_NAME, TEAM_LEAD_LAST_NAME, TEAM_LEAD_EMAIL 16-19-->
+                        <tr>
+                           <td> {{ item[11] }} - {{ item[14] }} - {{ item[13] }}</td>
+                           <td> {{ item[8] }} </td>
+                           <td>
+                               {{ item[5] }}
+                               {% if item[5]=="Rejected" %}
+                                    {% if member_age < 19 and joined_teams_count < 2 %}
+                                        <BR><a href="{{ url_for('main.join_team') }}">join another team as a team member</a>
+                                    {% endif %}
+                               {% endif %}
+                           </td>
+                           <td>
+                                {% if item[4] == 0 %}
+                                    N
+                                {% else %}
+                                    Y
+                                {% endif %}
+                           </td>
+                           <td> {{ item[17] + " " +  item[18] }} </td>
+                           <td> {{ item[19] }} </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            {% if myparticipation_count > 0 %}
+                <h2>Get Involved!</h2>
+                <HR>
+                <span class="d-block bg-info">
+                    Thank you for your contribution.<BR>
+                </span>
+                <table class="table medium">
+                    <thead>
+                        <tr>
+                          <th>My Role</th>
+                          <th>My Status</th>
+                          <th>Teleconferencing?</th>
+                          <th>Juror Experience?</th>
+                          <th>Availability</th>
+                          <th>Has Conflict?</th>
+                          <th>Conflicted School(s)</th>
+                        </tr>
+                    </thead>
+                    {% for row in myparticipation_list %}
+                        <tr>
+                           <td>
+                               {{ row[0] }}
+                               {% if row[10] > 0 %}
+                                    (team lead) <BR>
+                               {% else %}
+                                    <BR>
+                               {% endif %}
+                               {% if member_editable %}
+                                   <a href="{{ url_for('main.update_ppant') }}?type={{row[0]}}&ppant_id={{row[9]}}&tl_school_id={{row[10]}}" class="btn btn-info">Update</a>
+                               {% endif %}
+                           </td>
+                           <td> {{ row[2] }} </td>
+                           <td>
+                               {% if row[0] == "Volunteer" %}
+                                    Not Applicable
+                               {% else %}
+                                    {{ row[4] }}
+                               {% endif %}
+                           </td>
+                           <td>
+                               {% if row[0] == "Juror" %}
+                                    {{ row[11] }}
+                                    {% if row[12] == "Yes" %}
+                                    <BR>Your are nominated as Chair
+                                    {% endif %}
+                               {% else %}
+                                    Not Applicable
+                               {% endif %}
+                           </td>
+                           <td>
+                                {% if row[5] == "Yes" %}
+                                    <li>
+                                        {{two_day_timeslots['1']}}
+                                    </li>
+                                {% endif %}
+                                {% if row[6] == "Yes" %}
+                                    <li>
+                                        {{two_day_timeslots['2']}}
+                                    </li>
+                                {% endif %}
+                                {% if row[7] == "Yes" %}
+                                    <li>
+                                        {{two_day_timeslots['3']}}
+                                    </li>
+                                {% endif %}
+                                {% if row[8] == "Yes" %}
+                                    <li>
+                                        {{two_day_timeslots['4']}}
+                                    </li>
+                                {% endif %}
+                           </td>
+                           <td>
+                               {% if row[1] == 1 %}
+                                    Yes
+                               {% else %}
+                                    No
+                               {% endif %}
+                           </td>
+                           <td>
+                                <ul>
+                                {% for school in row[3] %}
+                                    <li>
+                                        {{ school[2] }} - {{ school[4] }} - {{ school[5] }}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                           </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endif %}
+      </div>
+
+{% endblock %}

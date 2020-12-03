@@ -1,0 +1,198 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Stage Management - Room A
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+          <li><a href="/admin">Planning</a></li>
+          <li><a href="#">Report (coming soon)</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <div class="alert alert-danger">
+          <strong>Caution! Please do NOT share your account with others.</strong>
+            If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="/stage_mgmt">Select Match</a></li>
+            <li><a href="#">Draw</a></li>
+            <li class="active"><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li><a href="#">Enter Scores</a></li>
+        </ul>
+        <br>
+    </div>
+    <div class = "container">
+        <h3>Round 2A Stage 1</h3>
+        <h4>Select team member:</h4>
+        <form class="form-inline" action="/stage_timing">
+            <div class="form-group">
+                <label for="sel1">Reporter: RHHS </label>
+                  <select class="form-control" id="sel1">
+                    <option>Select....................</option>
+                    <option selected>S1 Test</option>
+                    <option>S2 Test</option>
+                  </select>
+            </div>
+            <div class="form-group">
+                <label for="sel2">Opponent: UTS </label>
+                  <select class="form-control" id="sel2">
+                    <option>Select....................</option>
+                    <option selected>S3 Test</option>
+                    <option>S4 Test</option>
+                  </select>
+            </div>
+            <button type="submit" class="btn btn-info">Submit</button>
+        </form>
+
+        <BR>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Problem #</th>
+                            <th>Accepted</th>
+                            <th>Rejected</th>
+                            <th>Proposed</th>
+                            <th>Not Proposed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A. Inconspicuous Bottle</td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_A" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_A" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_A" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_A" checked></label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>B. Sweet Mirage</td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_B"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_B" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_B" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_B" checked></label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>C. Conducting Lines</td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_C" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_C" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_C" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_C" checked></label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>D. Falling Tower</td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_D" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_D" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_D" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_D" checked></label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>E. Playing Card</td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_E" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_E" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_E" ></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="radio">
+                                  <label><input type="radio" name="PROB_E" checked></label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "main/main_base_bi.html" %}  {# main/main_base_bi.html extends app_main_layout_bi.html #}
+
+{% block page_title %}
+    Administration Dashboard
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <hr>
+    <h3>Status</h3>
+    <p>click the slide of the pie for details.</p>
+
+    <div class="container">
+        <div class="ds-row">
+            <div class="ds-column-2">
+                <div class="container">
+                    <canvas id="teamChart" width="400" height="400"></canvas>
+                    <script>
+                        // Global parameters:
+                        // do not resize the chart canvas when its container does (keep at 600x400px)
+                        Chart.defaults.global.responsive = false;
+
+                        // create the chart using the chart canvas
+                        var teamChart = new Chart(document.getElementById("teamChart"), {
+                            type: 'pie',
+                            data: {
+                              labels: ["Approved", "Requested", "Rejected"],
+                              datasets: [
+                                {
+                                  label: "Team Status",
+                                  backgroundColor: ["#009900", "Red", "Orange"],
+                                  data : [{% for item in team_count_data %}
+                                                {{item}},
+                                              {% endfor %}]
+                                }
+                              ]
+                            },
+                            options: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                              title: {
+                                display: true,
+                                text: 'Teams (total: {{ team_count_total }})'
+                              }
+                            }
+                        });
+
+                        document.getElementById("teamChart").onclick = function(evt){
+                                var activePoints = teamChart.getElementsAtEvent(evt);
+                                var firstPoint = activePoints[0];
+                                var label = teamChart.data.labels[firstPoint._index];
+                                var value = teamChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                                if (firstPoint !== undefined)
+                                    // alert(label + ": " + value);
+                                    window.open('/admin_view_regist?type=team&label=' + label, "_self");
+                        };
+
+                    </script>
+                </div>
+            </div>
+            <div class="ds-column-2">
+                <div class="container">
+                    <canvas id="studentChart" width="400" height="400"></canvas>
+                    <script>
+                        // Global parameters:
+                        // do not resize the chart canvas when its container does (keep at 600x400px)
+                        Chart.defaults.global.responsive = false;
+
+                        // create the chart using the chart canvas
+                        var studentChart = new Chart(document.getElementById("studentChart"), {
+                            type: 'pie',
+                            data: {
+                              labels: ["Approved", "Requested", "Rejected"],
+                              datasets: [
+                                {
+                                  label: "Team Status",
+                                  backgroundColor: ["#46BFBD", "#F7464A", "#FDB45C"],
+                                  data : [{% for item in team_member_count_data %}
+                                                {{item}},
+                                              {% endfor %}]
+                                }
+                              ]
+                            },
+                            options: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                              title: {
+                                display: true,
+                                text: 'Team Members (total: {{ team_member_count_total }})'
+                              }
+                            }
+                        });
+
+                        document.getElementById("studentChart").onclick = function(evt){
+                                var activePoints = studentChart.getElementsAtEvent(evt);
+                                var firstPoint = activePoints[0];
+                                var label = studentChart.data.labels[firstPoint._index];
+                                var value = studentChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                                if (firstPoint !== undefined)
+                                    // alert(label + ": " + value);
+                                    window.open('/admin_view_regist?type=student&label=' + label, "_self");
+                        };
+
+                    </script>
+                </div>
+            </div>
+            <div class="ds-column-2">
+                <div class="container">
+                    <canvas id="jurorChart" width="400" height="400"></canvas>
+                    <script>
+                        // Global parameters:
+                        // do not resize the chart canvas when its container does (keep at 600x400px)
+                        Chart.defaults.global.responsive = false;
+
+                        // create the chart using the chart canvas
+                        var jurorChart = new Chart(document.getElementById("jurorChart"), {
+                            type: 'pie',
+                            data: {
+                              labels: ["Approved", "Requested", "Rejected"],
+                              datasets: [
+                                {
+                                  label: "Juror Status",
+                                  backgroundColor: ["#009900", "Red", "Orange"],
+                                  data : [{% for item in juror_count_data %}
+                                                {{item}},
+                                              {% endfor %}]
+                                }
+                              ]
+                            },
+                            options: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                              title: {
+                                display: true,
+                                text: 'Jurors (total: {{ juror_count_total }})'
+                              }
+                            }
+                        });
+
+                        document.getElementById("jurorChart").onclick = function(evt){
+                                var activePoints = jurorChart.getElementsAtEvent(evt);
+                                var firstPoint = activePoints[0];
+                                var label = jurorChart.data.labels[firstPoint._index];
+                                var value = jurorChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                                if (firstPoint !== undefined)
+                                    // alert(label + ": " + value);
+                                    window.open('/admin_view_regist?type=juror&label=' + label, "_self");
+                        };
+
+                    </script>
+                </div>
+            </div>
+            <div class="ds-column-2">
+                <div class="container">
+                    <canvas id="volunteerChart" width="400" height="400"></canvas>
+                    <script>
+                        // Global parameters:
+                        // do not resize the chart canvas when its container does (keep at 600x400px)
+                        Chart.defaults.global.responsive = false;
+
+                        // create the chart using the chart canvas
+                        var volunteerChart = new Chart(document.getElementById("volunteerChart"), {
+                            type: 'pie',
+                            data: {
+                              labels: ["Approved", "Requested", "Rejected"],
+                              datasets: [
+                                {
+                                  label: "Volunteer Status",
+                                  backgroundColor: ["#009900", "red", "Orange"],
+                                  data : [{% for item in volunteer_count_data %}
+                                                {{item}},
+                                              {% endfor %}]
+                                }
+                              ]
+                            },
+                            options: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                              title: {
+                                display: true,
+                                text: 'Volunteers (total: {{ volunteer_count_total }})'
+                              }
+                            }
+                        });
+
+                        document.getElementById("volunteerChart").onclick = function(evt){
+                                var activePoints = volunteerChart.getElementsAtEvent(evt);
+                                var firstPoint = activePoints[0];
+                                var label = volunteerChart.data.labels[firstPoint._index];
+                                var value = volunteerChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                                if (firstPoint !== undefined)
+                                    // alert(label + ": " + value);
+                                    window.open('/admin_view_regist?type=volunteer&label=' + label, "_self");
+                        };
+
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

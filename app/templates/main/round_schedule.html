@@ -1,0 +1,118 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}Tournament Schedule{% endblock %}
+{% block body %}
+    {{ super() }}
+    {% if round_code < 6 %}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h4>Round {{round_code}}</h4>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Room</th>
+                                        {% for room in master_mrooms %}
+                                            <th>{{room[1]}}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Teams</td>
+                                        {% for room in round_schedule[1] %}
+                                            <td>
+                                                {% for team in room[1] %}
+                                                    {{master_mteams[team[4]-1][1]}}<BR>
+                                                {% endfor %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Jurors</td>
+                                        {% for room in round_room_jurors[1] %}
+                                            <td>
+                                                {% for juror in room[1] %}
+                                                    {{master_mjurors[juror[2]-1][1]}}
+                                                    {% if master_mjurors[juror[2]-1][2][7] == "Yes" %}
+                                                        (Chair)
+                                                    {% endif %}
+                                                    <BR>
+                                                {% endfor %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Volunteers</td>
+                                        {% for room in master_room_mvolunteers %}
+                                            <td>
+                                                {% for volunteer in room[2] %}
+                                                    {{volunteer[2]}}<BR>
+                                                {% endfor %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {% if fm_schedule %}
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4>Round {{fm_schedule[3][1]}} (Final Match) </h4>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>{{fm_schedule[4][2]}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Teams</td>
+                                <td>
+                                    {% for team in fm_schedule[0] %}
+                                        {{master_mteams[team[1]-1][1]}}<BR>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Jurors</td>
+                                <td>
+                                    {% for juror in fm_schedule[1] %}
+                                        {{master_mjurors[juror[1]-1][1]}}
+                                        {% if master_mjurors[juror[1]-1][2][7] == "Yes" %}
+                                            (Chair)
+                                        {% endif %}
+                                        <BR>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Volunteers</td>
+                                <td>
+                                    {% for volunteer in master_room_mvolunteers[fm_schedule[4][1]-1][2] %}
+                                        {{ volunteer[2]}}<BR>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            Final match schedule is coming soon...
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

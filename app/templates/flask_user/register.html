@@ -1,0 +1,60 @@
+{% extends 'flask_user/_public_base.html' %}
+
+{% block content %}
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+<h1>{%trans%}Register{%endtrans%}</h1>
+<p>All fields are mandatory. This form is only compatibly with Google Chrome or Mozilla Firefox.</p>
+
+<form action="" method="POST" novalidate formnovalidate class="form" role="form">
+    {{ form.hidden_tag() }}
+
+    {# Username or Email #}
+    {% set field = form.username if user_manager.USER_ENABLE_USERNAME else form.email %}
+    <div class="form-group {% if field.errors %}has-error{% endif %}">
+        {# Label on left, "Already registered? Sign in." on right #}
+        <div class="row">
+            <div class="col-xs-6">
+                <label for="{{ field.id }}" class="control-label">{{ field.label.text }}</label>
+            </div>
+            <div class="col-xs-6 text-right">
+                {% if user_manager.USER_ENABLE_REGISTER %}
+                    <a href="{{ url_for('user.login') }}" tabindex='290'>
+                        {%trans%}Already registered? Sign in.{%endtrans%}</a>
+                {% endif %}
+            </div>
+        </div>
+        {{ field(class_='form-control', tabindex=210) }}
+        {% if field.errors %}
+            {% for e in field.errors %}
+                <p class="help-block">{{ e }}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {% if user_manager.USER_ENABLE_EMAIL and user_manager.USER_ENABLE_USERNAME %}
+        {{ render_field(form.email, tabindex=220) }}
+    {% endif %}
+
+    {{ render_field(form.password, tabindex=230) }}
+    <p>Password must have at least 6 characters with one lowercase letter, one uppercase letter and one number</p>
+    {% if user_manager.USER_REQUIRE_RETYPE_PASSWORD %}
+        {{ render_field(form.retype_password, tabindex=240) }}
+    {% endif %}
+
+    {{ render_field(form.first_name, tabindex=250) }}
+    {{ render_field(form.last_name, tabindex=260) }}
+    <b>Date of Birth</b><br>
+    <input type="date" name="dob"><br><br>
+    {{ render_field(form.pnumber, tabindex=270) }}
+    {{ render_field(form.institution, tabindex=280) }}
+    {{ render_field(form.background, tabindex=290) }}
+    {{ render_field(form.physics_background, tabindex=300) }}
+    {{ render_field(form.dietary_restriction, tabindex=310) }}
+    {{ render_field(form.tshirt_size, tabindex=320) }}
+
+    <a href="/static/pdf/Integrated_Consent_Form.pdf" target = "_blank">Terms and Conditions</a><br><br>
+
+    {{ render_submit_field(form.submit, tabindex=330) }}
+</form>
+
+{% endblock %}

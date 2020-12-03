@@ -1,0 +1,103 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}My Schedule{% endblock %}
+{% block body %}
+    {{ super() }}
+    <div class = "container">
+        <div class="row">
+            <div class="col-lg-8">
+                {% if team_schedules %}
+                    {% for mteam_schedule in team_schedules %}
+                        <h4>My Team: {{master_mteams[mteam_schedule[0]-1][1]}}</h4>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Round</th>
+                                    {% for i in range(5) %}
+                                        <th>{{i + 1}}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Room</td>
+                                    {% for room in mteam_schedule[1] %}
+                                        <td>
+                                            {{master_mrooms[room-1][1]}}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <td>Team</td>
+                                    {% for room in mteam_schedule[1] %}
+                                        <td>
+                                            {% for team in round_schedule[loop.index-1][1][room-1][1] %}
+                                                {{master_mteams[team[4]-1][1]}}<BR>
+                                            {% endfor %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
+                    {% endfor %}
+                {% endif %}
+                {% if juror_schedule %}
+                    <h4>
+                        Get Invovled as a Juror: {{master_mjurors[juror_schedule[0]-1][1]}}
+                        {% if master_mjurors[juror_schedule[0]-1][2][7] == "Yes" %}
+                            (Chair)
+                        {% endif %}
+                    </h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Round</th>
+                                {% for i in range(5) %}
+                                    <th>{{i + 1}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Room</td>
+                                {% for room in juror_schedule[1] %}
+                                    <td>
+                                        {{master_mrooms[room-1][1]}}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                {% endif %}
+                {% if volunteer_schedule %}
+                    <h4>
+                        Get Invovled as a Volunteer: {{volunteer_schedule[4]}} {{volunteer_schedule[5]}} - Room {{volunteer_schedule[2]}}
+                        {% if volunteer_schedule[3] == "Yes" %}
+                            (Data Entry)
+                        {% endif %}
+                    </h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Volunteers in Room {{volunteer_schedule[2]}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for volunteer in master_room_mvolunteers[volunteer_schedule[1]-1][2] %}
+                                <tr>
+                                    <td>
+                                        {{volunteer[2]}}
+                                        {% if volunteer[3][6] == "Yes" %}
+                                            (Data Entry)
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

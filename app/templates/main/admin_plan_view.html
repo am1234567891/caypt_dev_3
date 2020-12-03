@@ -1,0 +1,201 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Tournament Admin Management
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <h2>View Tournament Plan</h2>
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">View</a></li>
+            {% if plan_status == 'Proposed' and activable == 1 %}
+                <li><a href="/admin_planning">Plan Selective Matches</a></li>
+            {% endif %}
+            <li><a href="#">Plan Final Matches</a></li>
+            <li><a href="/publish">Publish</a></li>
+            <li><a href="/sm_problem">SM Problem</a></li>
+        </ul>
+    </div>
+    <div class = "container">
+        <div class="row">
+            <div class="col-lg-4">
+                <h3>Plan #{{plan_id}} - {{plan_status}} Schedule</h3>
+            </div>
+            <div class="col-lg-2">
+                <h3><a href="{{ url_for('main.admin_plan_download') }}?plan_id={{plan_id}}&plan_status={{plan_status}}" target="_blank">
+                  Download
+                </a></h3>
+            </div>
+            {% if plan_status == "Proposed" %}
+                <div class="col-lg-2">
+                    <h3>
+                        <a href="#" class="btn btn-warning" onclick="confirm_delete({{ plan_id }}, '{{ plan_status }}')">Delete</a>
+                    </h3>
+                </div>
+                {% if activable == 1 %}
+                    <form action="" method="post" class="form" role="form">
+                        {{ form.hidden_tag() }}
+                        <div class="col-lg-2">
+                            <h3>
+                                {{ render_submit_field(form.activate, tabindex=290) }}
+                            </h3>
+                        </div>
+                    </form>
+                {% endif %}
+            {% elif plan_status == "Active" and plan_sub_status < 1%}
+                <form action="" method="post" class="form" role="form">
+                    {{ form.hidden_tag() }}
+                    <div class="col-lg-4">
+                        <h3>
+                            <input type="submit" name = "deactivate" value="Deactivate">
+                            <input type="submit" name = "release" value="Release">
+                        </h3>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+        <BR>
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Round Schedule</h3>
+                <table class="table medium table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round No.</th>
+                            {% for room in mroom_list %}
+                                <th>Room {{room[4]}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for round in mround_list %}
+                            <tr>
+                                <td>{{round[0]}}</td>
+                                {% for pair in round[1]%}
+                                    {% if pair %}
+                                        <td>Team {{pair[1]}}<BR>School ID:{{pair[2]}}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td align="middle">Jurors</td>
+                                {% for jurors in moved_juror_list[round[0]-1][1]%}
+                                        <td>
+                                            <ul>
+                                            {% for juror in jurors[1]%}
+                                                <li>{{juror[2]}} - {{master_mjurors[juror[2]-1][1]}}</li>
+                                            {% endfor %}
+                                            </ul>
+                                        </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td>Assigned Juror Chair</td>
+                            {% for room in mjuror_list %}
+                                <td>
+                                    {% for juror in room[1]%}
+                                        {{master_mjurors[juror[1]-1][1]}}-COIS:
+                                        {% if juror[4] %}
+                                            {{juror[4]}}
+                                        {% else %}
+                                            n/a
+                                        {% endif %}
+                                        <BR>
+                                    {% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>Assigned Volunteers</td>
+                            {% for room in master_room_mvolunteers %}
+                                <td>
+                                    <ul>
+                                    {% for volunteer in room[2]%}
+                                        <li>
+                                        V{{volunteer[1]}}-{{volunteer[2]}}-COIS:
+                                        {% if volunteer[4] == 1  %}
+                                            {% for cois in volunteer[5] %}
+                                                -{{cois[0]}}
+                                            {% endfor %}
+                                        {% else %}
+                                            n/a
+                                        {% endif %}
+                                        {% if volunteer[6]=="Yes" %}
+                                            <BR>(Data Entry)
+                                        {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Teams' Room Schedule</h3>
+                <table class="table medium table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round No.</th>
+                            {% for team in mteam_list %}
+                                <th>{{team[5]}}-{{team[6]}}<BR>{{team[4]}}<BR>Team {{team[1]}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for round in mpair_team_list %}
+                            <tr>
+                                <td>{{round[0]}}</td>
+                                {% for team in round[1]%}
+                                    <td>
+                                    {% for room in mroom_list %}
+                                        {% if room[1] == team[4] %}
+                                            {{ room[4] }}
+                                        {% endif %}
+                                    {% endfor %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<script>
+function confirm_delete(current_plan_id, current_plan_status) {
+    var txt;
+    var r = confirm("Are you sure that you want to delete Plan #" + current_plan_id);
+    if (r == true) {
+      txt = "{{ url_for('main.admin_plan_delete') }}?plan_id=" + current_plan_id + "&plan_status=" + current_plan_status
+      location.href= txt;
+      return true;
+    } else {
+      txt = "#"
+      return false;
+    }
+}
+</script>
+
+{% endblock %}

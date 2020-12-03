@@ -1,0 +1,133 @@
+{% extends "main/main_base_pdf.html" %}  {# main/main_base.html extends app_main_layout_pdf.html #}
+
+{% block page_title %}
+    CaYPTMS - Report
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <h3>Plan #{{plan_id}} - {{plan_status}} Schedule</h3>
+        <BR>
+    </div>
+    <div class = "container">
+        <div class="row" style = "display:block; clear:both; page-break-after:always;">
+            <h4>Round Schedule</h4>
+            <div class="col-lg-12">
+                <table class="table medium table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round No.</th>
+                            {% for room in mroom_list %}
+                                <th>Room {{room[4]}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for round in mround_list %}
+                            <tr>
+                                <td>{{round[0]}}</td>
+                                {% for pair in round[1]%}
+                                    {% if pair %}
+                                        <td>Team No. {{pair[1]}}<BR>School ID:{{pair[2]}}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td></td>
+                                {% for jurors in moved_juror_list[round[0]-1][1]%}
+                                        <td>Juror:
+                                            {% for juror in jurors[1]%}
+                                                -{{juror[2]}}
+                                            {% endfor %}
+                                            <BR><BR>
+                                        </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td>Assigned Juror Chair</td>
+                            {% for room in mjuror_list %}
+                                <td>
+                                    <ul>
+                                        {% for juror in room[1]%}
+                                            <li>
+                                                {{master_mjurors[juror[1]-1][1]}}-COIS:
+                                                {% if juror[4] %}
+                                                    {{juror[4]}}
+                                                {% else %}
+                                                    n/a
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>Assigned Volunteers</td>
+                            {% for room in master_room_mvolunteers %}
+                                <td>
+                                    <ul>
+                                    {% for volunteer in room[2]%}
+                                        <li>
+                                        {{volunteer[2]}}-COIS:
+                                        {% if volunteer[4] == 1  %}
+                                            {% for cois in volunteer[5] %}
+                                                -{{cois[0]}}
+                                            {% endfor %}
+                                        {% else %}
+                                            no
+                                        {% endif %}
+                                        {% if volunteer[6]=="Yes" %}
+                                            <BR>(Data Entry)
+                                        {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <h4>Teams' Room Schedule</h4>
+            <div class="col-lg-14">
+                <table class="table medium table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round No.</th>
+                            {% for team in mteam_list %}
+                                <th>{{team[5]}}-{{team[6]}}<BR>{{team[4]}}<BR>Team {{team[1]}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for round in mpair_team_list %}
+                            <tr>
+                                <td>{{round[0]}}</td>
+                                {% for team in round[1]%}
+                                    <td>
+                                    {% for room in mroom_list %}
+                                        {% if room[1] == team[4] %}
+                                            {{ room[4] }}
+                                        {% endif %}
+                                    {% endfor %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "main/main_base_pdf.html" %}  {# main/main_base.html extends app_main_layout_pdf.html #}
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container" style="background-color: green; color: white;">
+        <div class="row">
+            <div class="col-lg-12" style="text-align: center;">
+                <h1>
+                Final Match
+                {% if current_room_code > 0 %}
+                     - Room {{ master_mrooms[current_room_code-1][1] }}
+                     - Stage {{current_stage_code}}
+                {% endif %}
+                </h1>
+            </div>
+        </div>
+    </div>
+    <div class="container" style="background-color: white; color: black;">
+        <div class="row">
+            <div class="col-lg-3" style="text-align: right;">
+                <h2>Reporter</h2>
+                <div class="chip-{{fm_steps[step_number-1]['reporter']}}">
+                    <img src="/static/img/{{fm_steps[step_number-1]['reporter']}}.jpg" alt="Person" width="96" height="96">
+                    {{current_stage_agenda[2][0][1]}} - {{ master_mteams[current_stage_agenda[2][0][1]-1][1]}} - {{current_stage_agenda[2][0][2][6]}}
+                </div>
+            </div>
+            <div class="col-lg-3" style="text-align: center;">
+                <h2>vs</h2>
+                <h4>
+                    {{fm_reporter_problem['problem_label']}}
+                </h4>
+            </div>
+            <div class="col-lg-3" style="text-align: left;">
+                <h2>Opponent</h2>
+                <div class="chip-{{fm_steps[step_number-1]['opponent']}}">
+                    <img src="/static/img/{{fm_steps[step_number-1]['opponent']}}.jpg" alt="Person" width="96" height="96">
+                    {{current_stage_agenda[2][1][1]}} - {{ master_mteams[current_stage_agenda[2][1][1]-1][1]}} - {{current_stage_agenda[2][1][2][6]}}
+                </div>
+            </div>
+            <div class="col-lg-3" style="text-align: left;">
+                <h2>Reviewer</h2>
+                <div class="chip-{{fm_steps[step_number-1]['reviewer']}}">
+                    <img src="/static/img/{{fm_steps[step_number-1]['reviewer']}}.jpg" alt="Person" width="96" height="96">
+                    {{current_stage_agenda[2][2][1]}} - {{ master_mteams[current_stage_agenda[2][2][1]-1][1]}} - {{current_stage_agenda[2][2][2][6]}}
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container" style="background-color: white; color: black;">
+        <br>
+        <div class="row">
+            <div class="col-lg-1">
+            </div>
+            <div class="col-lg-10" style="text-align: center;">
+                <h3>Step #{{step_number}} ( {{fm_steps[step_number-1]['step_mins']}} min(s) )</h3>
+                <P><font color="red">- {{fm_steps[step_number-1]['step_text']}}</font></P>
+            </div>
+            <div class="col-lg-1">
+            </div>
+        </div>
+        {% if step_number > total_steps %}
+            <h3> Welldone! All steps are completed!</h3>
+        {% else %}
+            <div class="row" style="background-color: white; color: black;">
+                <div class="col-lg-3" style="text-align: left;"></div>
+                <div class="col-lg-6" style="text-align: center;">
+                    <h1><div id = "timerText">{{fm_steps[step_number-1]['step_mins']}} min(s) allocated</div></h1>
+                    <div class="progress">
+                        <div id = "percentage" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3" style="text-align: right;"></div>
+            </div>
+            <div class="row" style="background-color: white; color: black;">
+                <div class="col-lg-3" style="text-align: left;"></div>
+                <div class="col-lg-6" style="text-align: center;">
+                    <h3><div id = "timerText2"></div></h3>
+                    <div class="progress">
+                        <div id = "percentage2" class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3" style="text-align: right;"></div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="container" style="background-color: white; color: black;">
+        <BR>
+        <div class="row">
+            <div class="col-lg-12" style="text-align: center;">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" onclick="startTimer({{fm_steps[step_number-1]['step_mins']}})">Start</button>
+                    <button type="button" class="btn btn-default" onclick="stopTimer()">Stop</button>
+                    {% if step_number > 1 %}
+                        <a href="/fm_timing?step={{step_number - 1}}" class="btn btn-default">Previous Step</a>
+                    {% endif %}
+                    {% if step_number < total_steps %}
+                        <a href="/fm_timing?step={{step_number + 1}}" class="btn btn-default">Next Step</a>
+                    {% else %}
+                        <a href="/fm_timing?step={{step_number + 1}}" class="btn btn-warning" onclick="return confirm('Is the stage finished?')">Done</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="row" style="background-color: green; color: white;">
+            <div class="col-lg-12" style="text-align: center;">
+                <h1>
+                </h1>
+        </div>
+    </div>
+    <script>
+        var mins;  //Set the number of minutes you need
+        var secs;
+        var psecs;
+        var currentSeconds;
+        var currentMinutes;
+        var is_overtime;
+        var total_over_mins;
+        var myVar;
+
+        function startTimer(maxMins) {
+            mins = maxMins;
+            secs = mins * 60;
+            psecs = mins * 60;
+            currentSeconds = 0;
+            currentMinutes = 0;
+            is_overtime = 0;
+            total_over_mins = 0;
+            myVar = setTimeout(Decrement,1000);
+        }
+
+        function Decrement() {
+            currentMinutes = Math.floor(secs / 60);
+            currentSeconds = secs % 60;
+            if(currentSeconds <= 9) currentSeconds = "0" + currentSeconds;
+            secs--;
+
+            /* determine what to show on the timerText*/
+            if (is_overtime < 1) {
+                document.getElementById("timerText").innerHTML = currentMinutes + "m : " + currentSeconds + "s "; //Set the element id you need the time put into.
+            } else {
+                document.getElementById("timerText2").innerHTML = "Overtime: " + (total_over_mins - currentMinutes -1) + "m : " + (60 - currentSeconds) + "s "; //Set the element id you need the time put into.
+            }
+
+            if(secs !== -1) {
+                myVar=setTimeout('Decrement()',1000);
+            } else {
+                /* alert(secs, psecs, currentMinutes, currentSeconds) */
+                secs = psecs;
+                myVar=setTimeout('Decrement()',1000);
+                total_over_mins = total_over_mins + mins;
+                is_overtime = is_overtime + 1
+                if (is_overtime > 1) document.getElementById("percentage2").className = "progress-bar progress-bar-danger progress-bar-striped active";
+                else document.getElementById("percentage2").className = "progress-bar progress-bar-warning progress-bar-striped active";
+            }
+
+            /* determine the progress percentage:
+             * if within regular timeframe, show % at the first progress bar
+             * otherwise show % at the 2nd progress bar, the % is continue to grow
+            */
+            if (is_overtime < 1) {
+                document.getElementById("percentage").innerHTML = parseInt((psecs-secs)/psecs * 100) + "%";
+                document.getElementById("percentage").style.width = (psecs-secs)/psecs * 100 + "%";
+            } else {
+                document.getElementById("percentage2").innerHTML = parseInt(((psecs-secs)/psecs + is_overtime -1) * 100) + "%";
+                document.getElementById("percentage2").style.width = (psecs-secs)/psecs * 100 + "%";
+            }
+        }
+
+        function stopTimer() {
+            clearTimeout(myVar);
+        }
+
+    </script>
+
+{% endblock %}

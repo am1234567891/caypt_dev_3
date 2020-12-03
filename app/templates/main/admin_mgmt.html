@@ -1,0 +1,110 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Tournament Admin Management
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+
+        <div class="alert alert-danger">
+          <strong>Danger!</strong> Only one administrator can work on the planning at the same point of time.
+            <BR>Please ensure that the <strong>add/update team and participant functions are all closed properly</strong>
+            . If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">View</a></li>
+            {% if plan_status == 'Proposed' %}
+                <li><a href="/admin_planning">Plan Selective Matches</a></li>
+            {% endif %}
+            {% if active_fm_plan_count == 0 %}
+                <li><a href="/fm_planning">Plan Final Matches</a></li>
+            {% endif %}
+            <li><a href="/publish">Publish</a></li>
+            <li><a href="/sm_problem">SM Problem</a></li>
+        </ul>
+        <br>
+    </div>
+    {% if plan_status %}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3>Selective Match Plan</h3>
+                </div>
+                <div class="col-lg-6">
+                    <h3>Final Match Plan</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <ul>
+                        {% for plan in plan_list %}
+                            {% if plan[3] == 1 %}
+                                <li>
+                                {% if plan[2] == "Proposed" and active_sm_plan_count == 0 %}
+                                    <a href="/admin_plan_view?plan_id={{ plan[1] }}&plan_status={{ plan[2] }}&activable=1&plan_sub_status={{ plan[4] }}">Plan #{{ plan[1] }} - {{ plan[2] }}</a>
+                                {% else %}
+                                    <a href="/admin_plan_view?plan_id={{ plan[1] }}&plan_status={{ plan[2] }}&activable=0&plan_sub_status={{ plan[4] }}">Plan #{{ plan[1] }} - {{ plan[2] }}</a>
+                                {% endif %}
+                                {% if plan[4] == 1 %}
+                                     - Released
+                                {% elif plan[4] == 2 %}
+                                     - Published
+                                {% endif %}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <ul>
+                        {% for plan in plan_list %}
+                            {% if plan[3] == 2 %}
+                                <li>
+                                {% if plan[2] == "Proposed" and active_fm_plan_count == 0 %}
+                                    <a href="/fm_plan_view?plan_id={{ plan[1] }}&plan_status={{ plan[2] }}&activable=1&plan_sub_status={{ plan[4] }}">Plan #{{ plan[1] }} - {{ plan[2] }}</a>
+                                {% else %}
+                                    <a href="/fm_plan_view?plan_id={{ plan[1] }}&plan_status={{ plan[2] }}&activable=0&plan_sub_status={{ plan[4] }}">Plan #{{ plan[1] }} - {{ plan[2] }}</a>
+                                {% endif %}
+                                {% if plan[4] == 1 %}
+                                     - Released
+                                {% elif plan[4] == 2 %}
+                                     - Published
+                                {% endif %}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+<script>
+function confirm_delete(current_plan_id, current_plan_status) {
+    var txt;
+    var r = confirm("Are you sure that you want to delete Plan #" + current_plan_id);
+    if (r == true) {
+      txt = "{{ url_for('main.admin_plan_delete') }}?plan_id=" + current_plan_id + "&plan_status=" + current_plan_status
+      location.href= txt;
+      return true;
+    } else {
+      txt = "#"
+      return false;
+    }
+}
+</script>
+{% endblock %}

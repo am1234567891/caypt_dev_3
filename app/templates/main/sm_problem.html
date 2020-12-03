@@ -1,0 +1,301 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Tournament Admin Management
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+
+        <div class="alert alert-danger">
+          <strong>Danger!</strong> Only one administrator can work on the planning at the same point of time.
+            <BR>Please ensure that the <strong>add/update team and participant functions are all closed properly</strong>
+            . If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="/admin_mgmt">View</a></li>
+            <li><a href="/publish">Publish</a></li>
+            <li class="active"><a href="#">SM Problem</a></li>
+        </ul>
+        <br>
+    </div>
+    <div class = "container">
+        <div class="row">
+            <div class="col-lg-7">
+                <ul class="nav nav-tabs">
+                    {% if sm_round_code>3 %}
+                        <li><a data-toggle="tab" href="#day1">Day 1</a></li>
+                        <li class="active"><a data-toggle="tab" href="#day2">Day 2</a></li>
+                    {% else %}
+                        <li class="active"><a data-toggle="tab" href="#day1">Day 1</a></li>
+                        <li><a data-toggle="tab" href="#day2">Day 2</a></li>
+                    {% endif %}
+                </ul>
+                <div class="tab-content">
+                    {% if sm_round_code>3 %}
+                        <div id="day1" class="tab-pane fade">
+                    {% else %}
+                        <div id="day1" class="tab-pane fade in active">
+                    {% endif %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    {% for item in problem_label_codes[:5] %}
+                                        <th>Problem {{item[0]}}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if selected_pair_codes %}
+                                    {% for team in team_problems%}
+                                        {% if team[0] in selected_pair_codes %}
+                                        <tr>
+                                            <td>
+                                                {{master_mteams[team[0]-1][1]}}
+                                            </td>
+                                            {% for problem in team[1][:5] %}
+                                                <td>
+                                                    {% if problem[1] %}
+                                                        {% for item in problem [1][0]%}
+                                                            {% if item[3] == 2 %}
+                                                                {% if item[4] == 3 %}
+                                                                    R{{item[0]}}S{{item[2]}}- <span class="badge badge-default">O</span><BR>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                R{{item[0]}}S{{item[2]}}-
+                                                                {% if item[4] == 3 %}
+                                                                    <span class="badge badge-info">A</span><BR>
+                                                                {% else %}
+                                                                    <span class="badge badge-warning">R</span><BR>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for team in team_problems%}
+                                        <tr>
+                                            <td>
+                                                {{master_mteams[team[0]-1][1]}}
+                                            </td>
+                                            {% for problem in team[1][:5] %}
+                                                <td>
+                                                    {% if problem[1] %}
+                                                        {% for item in problem [1][0]%}
+                                                            {% if item[3] == 2 %}
+                                                                {% if item[4] == 3 %}
+                                                                    R{{item[0]}}S{{item[2]}}- <span class="badge badge-default">O</span><BR>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                R{{item[0]}}S{{item[2]}}-
+                                                                {% if item[4] == 3 %}
+                                                                    <span class="badge badge-info">A</span><BR>
+                                                                {% else %}
+                                                                    <span class="badge badge-warning">R</span><BR>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if sm_round_code>3 %}
+                        <div id="day2" class="tab-pane fade in active">
+                    {% else %}
+                        <div id="day2" class="tab-pane fade">
+                    {% endif %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    {% for item in problem_label_codes[-5:] %}
+                                        <th>Problem {{item[0]}}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if selected_pair_codes %}
+                                    {% for team in team_problems%}
+                                        {% if team[0] in selected_pair_codes %}
+                                        <tr>
+                                            <td>
+                                                {{master_mteams[team[0]-1][1]}}
+                                            </td>
+                                            {% for problem in team[1][-5:] %}
+                                                <td>
+                                                    {% if problem[1] %}
+                                                        {% for item in problem [1][0]%}
+                                                            {% if item[3] == 2 %}
+                                                                {% if item[4] == 3 %}
+                                                                    R{{item[0]}}S{{item[2]}}- <span class="badge badge-default">O</span><BR>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                R{{item[0]}}S{{item[2]}}-
+                                                                {% if item[4] == 3 %}
+                                                                    <span class="badge badge-info">A</span><BR>
+                                                                {% else %}
+                                                                    <span class="badge badge-warning">R</span><BR>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for team in team_problems%}
+                                        <tr>
+                                            <td>
+                                                {{master_mteams[team[0]-1][1]}}
+                                            </td>
+                                            {% for problem in team[1][-5:] %}
+                                                <td>
+                                                    {% if problem[1] %}
+                                                        {% for item in problem [1][0]%}
+                                                            {% if item[3] == 2 %}
+                                                                {% if item[4] == 3 %}
+                                                                    R{{item[0]}}S{{item[2]}}- <span class="badge badge-default">O</span><BR>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                R{{item[0]}}S{{item[2]}}-
+                                                                {% if item[4] == 3 %}
+                                                                    <span class="badge badge-info">A</span><BR>
+                                                                {% else %}
+                                                                    <span class="badge badge-warning">R</span><BR>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    {% if current_mpair_id > 0 %}
+                        Please enter the problem selection guide: <!-- {{current_mpair_id}} -->
+                        <h3>Round {{sm_round_code}}- Room {{master_mrooms[sm_room_code-1][1]}}</h3>
+                        <form class="form-inline" action="" method="POST">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="current_mpair_id" value="{{current_mpair_id}}">
+                            <textarea class="form-control" rows="8" placeholder="What's up?" name="proble_guide">{{problem_guide}}</textarea>
+                            <button type="submit">Submit</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-5">
+                Problem Selection Guides
+                <a href="/sm_problem"><button type="button" class="btn btn-default btn-xs">Clear</button></a>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            {% for room in master_mrooms %}
+                                <th>Room {{room[1]}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for round in round_schedule %}
+                            <tr>
+                                <td>{{round[0]}}</td>
+                                {% for room in round[1] %}
+                                    <td>
+                                        {% if room[2] < 99 %}
+                                            <a href="/sm_problem?sm_round={{round[0]}}&sm_room={{room[0]}}">
+                                                <button type="button" class="btn btn-primary btn-xs">
+                                                    {% if room[2] == 0 %}
+                                                        Not Started
+                                                    {% elif room[2] == 1 %}
+                                                        Draw Made
+                                                    {% elif room[2] == 11 %}
+                                                        Stage1 WIP
+                                                    {% elif room[2] == 12 %}
+                                                        Stage1 Scoring
+                                                    {% elif room[2] == 13 %}
+                                                        Stage1 Validating
+                                                    {% elif room[2] == 21 %}
+                                                        Stage2 WIP
+                                                    {% elif room[2] == 22 %}
+                                                        Stage2 Scoring
+                                                    {% elif room[2] == 23 %}
+                                                        Stage2 Validating
+                                                    {% elif room[2] == 99 %}
+                                                        &#9989;
+                                                    {% else %}
+                                                        Unknown
+                                                    {% endif %}
+                                                </button>
+                                            </a>
+                                            <BR>
+                                        {% endif %}
+                                        {% for team in room[1] %}
+                                            {% if team[6] == 1 %}
+                                                <font color="red" size="2">★</font>
+                                            {% endif %}
+                                            {{master_mteams[team[4]-1][1]}}<BR>
+                                        {% endfor %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+    <script>
+    function confirm_delete(current_plan_id, current_plan_status) {
+        var txt;
+        var r = confirm("Are you sure that you want to delete Plan #" + current_plan_id);
+        if (r == true) {
+          txt = "{{ url_for('main.admin_plan_delete') }}?plan_id=" + current_plan_id + "&plan_status=" + current_plan_status
+          location.href= txt;
+          return true;
+        } else {
+          txt = "#"
+          return false;
+        }
+    }
+    </script>
+{% endblock %}

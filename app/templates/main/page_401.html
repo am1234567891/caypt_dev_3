@@ -1,0 +1,7 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}Unauthorized(401){% endblock %}
+{% block body %}
+    {{ super() }}
+    You're not allowed to access.
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Tournament Admin Management
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+
+        <div class="alert alert-danger">
+          <strong>Danger!</strong> Publish is very powerful and only for the Tournament days.
+            <BR><strong>You must UN-Publish immediately at the end of the tournament day.</strong>
+            . If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="/admin_mgmt">View Plan</a></li>
+            {% if plan_status == 'Proposed' %}
+                <li><a href="/admin_planning">Plan Selective Matches</a></li>
+            {% endif %}
+            {% if fm_plan_sub_status == 0 %}
+                <li><a href="#">Plan Final Matches</a></li>
+            {% endif %}
+            <li class="active"><a href="#">Publish</a></li>
+            <li><a href="/sm_problem">SM Problem</a></li>
+        </ul>
+        <br>
+    </div>
+    <div class = "container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h3>
+                    {% if sm_plan_sub_status > 0 %}
+                        <a href="/sm_dashboard?plan_id={{sm_plan_id}}&plan_sub_status={{sm_plan_sub_status}}">Selective Match Plan</a>
+                    {% else %}
+                        Selective Match Plan
+                    {% endif %}
+                </h3><BR><BR>
+                <form class="form-inline" action="" method="POST">
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" name="plan_id" value="{{sm_plan_id}}">
+                    <input type="hidden" name="plan_type" value="1">
+                    {% if sm_plan_sub_status == 2 %}
+                        <button type="submit" class="btn btn-danger" name="plan_sub_status" value="1"
+                                onclick="return confirm('Are you sure?')">UN-Publish
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-danger" name="plan_sub_status" value="2"
+                                onclick="return confirm('Are you sure?')">Publish
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="col-lg-6">
+                <h3>
+                    {% if fm_plan_sub_status > 0 %}
+                        <a href="/fm_score_view?fm_plan_id={{fm_plan_id}}&plan_sub_status={{fm_plan_sub_status}}&sm_plan_id={{sm_plan_id}}">Final Match Plan</a>
+                    {% else %}
+                        Final Match Plan
+                    {% endif %}
+                </h3><BR><BR>
+                <form class="form-inline" action="" method="POST">
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" name="plan_id" value="{{fm_plan_id}}">
+                    <input type="hidden" name="plan_type" value="2">
+                    {% if fm_plan_sub_status == 2 %}
+                        <button type="submit" class="btn btn-danger" name="plan_sub_status" value="1"
+                                onclick="return confirm('Are you sure?')">UN-Publish
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-danger" name="plan_sub_status" value="2"
+                                onclick="return confirm('Are you sure?')">Publish
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

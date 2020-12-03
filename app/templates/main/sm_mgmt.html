@@ -1,0 +1,125 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Selective Match
+    {% if current_room_code > 0 %}
+         - Room {{ master_mrooms[current_room_code-1][1] }}
+    {% endif %}
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <div class="alert alert-danger">
+            <strong>Caution! Please follow the instruction and operate carefully.</strong>
+            If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">Round</a></li>
+            <li><a href="#">Draw</a></li>
+            <li><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li><a href="#">Enter Scores</a></li>
+            <li><a href="#">Validate</a></li>
+        </ul>
+    </div>
+    {% if current_room_code < 1 %}
+        <div class = "container">
+            <h3>Please select room no.</h3>
+            <div class="row">
+                <div class="col-lg-3">
+                    <form action="" method="post" class="form" role="form">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group">
+                            <label for="current_room_code">Room list:</label>
+                            <select class="form-control" name="current_room_code" id="current_room_code">
+                                {% for room in master_mrooms %}
+                                    <option value="{{room[0]}}">{{room[1]}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {{ render_submit_field(form.submit, tabindex=290) }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class = "container">
+            <h3>Select Round No.</h3>
+            <div class="row">
+                <div class="col-lg-10">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Round #</th>
+                                <th>Stage 1</th>
+                                <th>Stage 2</th>
+                                <th>Scheudled Teams </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for round in sm_current_room_pairs[2] %}
+                                <tr>
+                                    <td>
+                                        {% if round[2] < 2 or round[2] == 13 %}
+                                            <a href="/sm_draw?room={{current_room_code}}&round={{round[0]}}&plan={{ plan_id }}"> Round {{ round[0] }}</a>
+                                        {% elif round[2] == 23 and is_super %}
+                                            <a href="/sm_validate?room={{current_room_code}}&round={{round[0]}}&plan={{ plan_id }}&pair={{round[3]}}"> Round {{ round[0] }}</a>
+                                        {% elif round[2] == 99 %}
+                                            <a href="/sm_score_view?room={{current_room_code}}&round={{round[0]}}&plan={{ plan_id }}&pair={{round[3]}}&type=1"> Round {{ round[0] }}</a>
+                                        {% else %}
+                                            Round {{ round[0] }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if round[2] == 0 %}
+                                            Not Started
+                                        {% elif round[2] == 1 %}
+                                            Initiated
+                                        {% elif round[2] == 11 %}
+                                            WIP
+                                        {% elif round[2] == 12 %}
+                                            Waiting for scoring
+                                        {% elif round[2] >= 13 and round[2]<= 23 %}
+                                            Score Validation WIP
+                                        {% elif round[2] == 99 %}
+                                            &#9989;
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if round[2] == 0 %}
+                                            Not Started
+                                        {% elif round[2] >0 and round[2] < 20 %}
+                                            Initiated
+                                        {% elif round[2] == 21 %}
+                                            WIP
+                                        {% elif round[2] == 22 %}
+                                            Waiting for scoring
+                                        {% elif round[2] == 23 %}
+                                            Score Validation WIP
+                                        {% elif round[2] == 99 %}
+                                            &#9989;
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% for team in round[1] %}
+                                            <!-- mteam code: {{ team[4]}} - -->
+                                        {{master_mteams[team[4]-1][1] }} <BR>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

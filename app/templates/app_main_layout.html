@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.united.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <title>{{ user_manager.USER_APP_NAME }}</title>
+    <style>
+        .nav-tabs > li > a{
+          color: #357EC7;
+        }
+        .progress {
+          background-color: #aaa;
+          -webkit-box-shadow: none;
+          box-shadow: none;
+        }
+        .badge {
+          padding: 1px 9px 2px;
+          font-size: 12.025px;
+          font-weight: bold;
+          white-space: nowrap;
+          color: #ffffff;
+          background-color: #999999;
+          -webkit-border-radius: 9px;
+          -moz-border-radius: 9px;
+          border-radius: 9px;
+        }
+        .badge:hover {
+          color: #ffffff;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .badge-error {
+          background-color: #b94a48;
+        }
+        .badge-error:hover {
+          background-color: #953b39;
+        }
+        .badge-warning {
+          background-color: #f89406;
+        }
+        .badge-warning:hover {
+          background-color: #c67605;
+        }
+        .badge-success {
+          background-color: #468847;
+        }
+        .badge-success:hover {
+          background-color: #356635;
+        }
+        .badge-info {
+          background-color: #3a87ad;
+        }
+        .badge-info:hover {
+          background-color: #2d6987;
+        }
+        .badge-inverse {
+          background-color: #333333;
+        }
+        .badge-inverse:hover {
+          background-color: #1a1a1a;
+        }
+
+        .label {
+          padding: 1px 9px 2px;
+          font-weight: bold;
+          white-space: nowrap;
+          color: #ffffff;
+          background-color: #999999;
+          -webkit-border-radius: 9px;
+          -moz-border-radius: 9px;
+          border-radius: 9px;
+          text-align: left;
+          min-width: 268px;
+          display: inline-block;
+        }
+        .label:hover {
+          color: #ffffff;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .label-error {
+          background-color: #b94a48;
+        }
+        .label-error:hover {
+          background-color: #953b39;
+        }
+        .label-warning {
+          background-color: #f89406;
+        }
+        .label-warning:hover {
+          background-color: #c67605;
+        }
+        .label-success {
+          background-color: #468847;
+        }
+        .label-success:hover {
+          background-color: #356635;
+        }
+        .label-info {
+          background-color: #3a87ad;
+        }
+        .label-info:hover {
+          background-color: #2d6987;
+        }
+        .label-inverse {
+          background-color: #333333;
+        }
+        .label-inverse:hover {
+          background-color: #1a1a1a;
+        }
+        .lb-sm {
+            font-size: 12px;
+        }
+
+        .lb-md {
+            font-size: 16px;
+        }
+
+        .lb-lg {
+            font-size: 20px;
+        }
+
+        .loader {
+          display: none;
+          top: 50%;
+          left: 50%;
+          position: absolute;
+          transform: translate(-50%, -50%);
+        }
+
+        .loading {
+          border: 2px solid #ccc;
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          border-top-color: #1ecd97;
+          border-left-color: #1ecd97;
+          animation: spin 1s infinite ease-in;
+        }
+
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+    </style>
+
+    {# *** Allow sub-templates to insert extra html to the head section *** #}
+    {% block extra_css %}{% endblock %}
+  </head>
+
+
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">{{ user_manager.USER_APP_NAME }}</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">{%trans%}Home{%endtrans%}</a></li>
+                    {% if call_or_get(current_user.is_authenticated) %}
+                        <li><a href="/member">{%trans%}Member{%endtrans%}</a></li>
+                        {% if call_or_get(current_user.is_authenticated) %}
+                            {% if current_user.has_roles('admin') %}
+                            <li><a href="/admin">{%trans%}Admin{%endtrans%}</a></li>
+                            {% endif %}
+                        {% endif%}
+                        {% if call_or_get(current_user.is_authenticated) %}
+                            {% if current_user.has_roles('super') %}
+                            <li><a href="/admin_mgmt">{%trans%}Planning{%endtrans%}</a></li>
+                            {% endif %}
+                        {% endif%}
+                        {% if call_or_get(current_user.is_authenticated) %}
+                            {% if current_user.has_roles('data') %}
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">{%trans%}Stage Management{%endtrans%}
+                                    <span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/sm_mgmt">Selective Match</a></li>
+                                        <li><a href="/fm_mgmt">Final Match</a></li>
+                                    </ul>
+                                </li>
+                            {% endif %}
+                        {% endif%}
+                    {% else %}
+                        <li><a href="/#about">{%trans%}About{%endtrans%}</a></li>
+                        <li><a href="/#schedule">{%trans%}Schedule{%endtrans%}</a></li>
+                        <li><a href="/#rank">{%trans%}Rank{%endtrans%}</a></li>
+                        <li><a href="/#contact">{%trans%}Contact{%endtrans%}</a></li>
+                    {% endif %}
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    {% if call_or_get(current_user.is_authenticated) %}
+                        <li><a href="{{ url_for('user.edit_user_profile') }}">{{ current_user.username or current_user.email }}</a></li>
+                        <li><a href="{{ url_for('user.logout') }}">{%trans%}Sign out{%endtrans%}</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('user.login') }}">{%trans%}Sign in{%endtrans%}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+    <div id="main-div" class="with-margins">
+    {# One-time system messages called Flash messages #}
+    {% block flash_messages %}
+        {%- with messages = get_flashed_messages(with_categories=true) -%}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category=='error' %}
+                        {% set category='danger' %}
+                    {% endif %}
+                    <hr class="no-margins"/>
+                    <div class="alert alert-{{category}}">{{ message|safe }}</div>
+                {% endfor %}
+            {% endif %}
+        {%- endwith %}
+    {% endblock %}
+
+    <div class="container">
+
+      <h1>{% block page_title %}{% endblock %}</h1>
+
+      <p>{% block body %}{% endblock %}</p>
+
+    </div>
+
+
+      <!-- ======= Footer ======= -->
+      <footer id="footer" style="background-color:#323548; color: white;">
+        <div class="container" style="text-align: center;">
+          <h3>{{ user_manager.USER_APP_NAME }}</h3>
+          <div class="copyright">
+            &copy; Copyright 2020-2021 <strong><span>{{ user_manager.USER_APP_NAME }}</span></strong>. All Rights Reserved
+          </div>
+            <BR><BR>
+        </div>
+      </footer><!-- End Footer -->
+  </body>
+</html>

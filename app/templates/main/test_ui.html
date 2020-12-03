@@ -1,0 +1,138 @@
+{% extends "main/main_base_bi.html" %}  {# main/main_base_chart.html extends app_main_layout_bi.html #}
+
+{% block page_title %}
+    Administration
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="#">Team Registration</a></li>
+          <li><a href="#">Get Involved</a></li>
+          <li><a href="#">Planning</a></li>
+          <li><a href="#">Report</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block body %}
+    {{ super() }}
+    <hr>
+    <h3>Team Registration</h3>
+    <h4>Teams that are waiting for approval</h4>
+
+    <BR><BR>
+    <div class="container">
+        <input class="form-control" id="myInput" style="width: 50%; float: left" type="text" placeholder="Type your word to filter.." value="Invalid">
+        <button class="btn btn-default toggle-all" style="float: right">Toggle - Open All</button>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>File ID</th>
+                        <th>File Name</th>
+                        <th>Validation Time</th>
+                        <th>Validation Results</th>
+                    </tr>
+                </thead>
+                <tbody id="myTable">
+                    <tr>
+                        <td>1</td>
+                        <td>detail_code.xls</td>
+                        <td>Nov 13, 2019 11:28:01</td>
+                        <td>
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="collapse-heading-01">
+                                    <button type="button" class="btn btn-default" style="width: 80px;" data-toggle="collapse" data-parent="#accordion" data-target="#file01">_Valid_</button>
+                                </div>
+                                <div class="panel-collapse collapse" id="file01" role="tabpanel" aria-labelledby="collapse-heading-01">
+                                    <div class="panel-body">
+                                        File is valid. No issue identified.
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>address.xls</td>
+                        <td>Nov 13, 2019 11:28:02</td>
+                        <td>
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="collapse-heading-02">
+                                    <button type="button" class="btn btn-warning" style="width: 80px;" data-toggle="collapse" data-parent="#accordion" data-target="#file02">_Invalid_</button>
+                                </div>
+                                <div class="panel-collapse collapse" id="file02" role="tabpanel" aria-labelledby="collapse-heading-02">
+                                    <div class="panel-body">
+                                        <table class="table">
+                                        <thead>
+                                          <tr>
+                                            <th>Error Code</th>
+                                            <th>Description</th>
+                                            <th>Error File / Log</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr>
+                                            <td>032</td>
+                                            <td>Duplicated Record</td>
+                                            <td>
+                                                <button type="button" class="btn">Download</button>
+                                                <button type="button" class="btn">Open</button>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td>102</td>
+                                            <td>Missing mandatory data: postal code</td>
+                                            <td>
+                                                <button type="button" class="btn">Download</button>
+                                                <button type="button" class="btn">Open</button>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+<script>
+
+$('.toggle-all').click(function(){
+
+    if ($(this).data("lastState") === null || $(this).data("lastState") === 0) {
+        $('.collapse.in').collapse('hide');
+        $(this).data("lastState",1);
+        $(this).text("Toggle - Open All");
+    }
+    else {
+
+        $('.panel-collapse').removeData('bs.collapse')
+        .collapse({parent:false, toggle:false})
+        .collapse('show')
+        .removeData('bs.collapse')
+        .collapse({parent:'#accordion', toggle:false});
+
+        $(this).data("lastState",0);
+        $(this).text("Toggle - Close All");
+    }
+
+});
+
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+</script>
+
+{% endblock %}

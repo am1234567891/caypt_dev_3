@@ -1,0 +1,175 @@
+{% extends "main/main_base_bi.html" %}  {# main/main_base_chart.html extends app_main_layout_bi.html #}
+
+{% block page_title %}
+    Administration Dashboard
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block body %}
+    {{ super() }}
+    <hr>
+    <h3>Juror Registration</h3>
+    <h4>Jurors that are {{ juror_status }}</h4>
+
+    <BR><BR>
+    {% if jurors_count > 0 %}
+        <div class="container">
+            <input class="form-control" id="myInput" style="width: 50%; float: left" type="text" placeholder="Type your word to filter..">
+            <button class="btn btn-default toggle-all" style="float: right">Toggle - Open All</button>
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                          <th>Juror Name</th>
+                          <th>Birth Date</th>
+                          <th>Education &<BR> Physics Background</th>
+                          <th>Juror_Availability</th>
+                          <th>Juror Status</th>
+                          <th>Teleconferencing?</th>
+                          <th>Conflict of Interest (COI)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for row in juror_list %}
+                            <tr>
+                                <td>
+                                    {{ loop.index }}. {{ row[5] }}
+                                    {% if row[17] > 0 %}
+                                    <BR>(*team lead)
+                                    {% endif %}
+                                    <BR> {{ row[15] }}
+                                </td>
+                                <td> {{ row[7] }} </td>
+                                <td> {{ row[6] }} <BR> {{ row[9] }} <BR> {{ row[10] }} </td>
+                                <td>
+                                    {% if row[11] == "Yes" %}
+                                        <li>
+                                            Day 1 (Saturday Feb 29th, 2020) 10am - 2pm
+                                        </li>
+                                    {% endif %}
+                                    {% if row[12] == "Yes" %}
+                                        <li>
+                                            Day 1 (Saturday Feb 29th, 2020) 2pm - 6pm
+                                        </li>
+                                    {% endif %}
+                                    {% if row[13] == "Yes" %}
+                                        <li>
+                                            Day 2 (Saturday Mar 7th, 2020) 10am - 3pm
+                                        </li>
+                                    {% endif %}
+                                    {% if row[14] == "Yes" %}
+                                        <li>
+                                            Day 2 (Saturday Mar 7th, 2020) 3pm - 7pm
+                                        </li>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                   {{ row[2] }}<BR> Juror Experience: {{ row[18] }}
+                                    {% if row[2] == 'Requested' %}
+                                        on {{ row[8] }}<BR>
+                                        {% if sm_plan_sub_status == 0 %}
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('main.admin_juror_approval') }}?type=approve&juror_id={{row[0]}}&juror_name={{row[5]}}" class="btn btn-info">Approve</a>
+                                                <a href="{{ url_for('main.admin_juror_approval') }}?type=reject&juror_id={{row[0]}}&juror_name={{row[5]}}" class="btn btn-primary">Reject</a>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if row[19] == "Yes" %}
+                                        {% if sm_plan_sub_status == 0 %}
+                                            <BR> Is Chair<BR>
+                                            <a href="{{ url_for('main.admin_juror_approval') }}?type=not_assign_chair&juror_id={{row[0]}}&juror_name={{row[5]}}" class="btn btn-warning">Not assign as Chair</a>
+                                        {% else %}
+                                            <BR> <font color="blue">Is Chair</font><BR>
+                                        {% endif %}
+                                    {% else %} <!--row[16]teleconf, row[18]juror experience -->
+                                        {% if row[2] == "Approved" and row[16] == "No" and row[11] == "Yes" and row[12] == "Yes" and row[13] == "Yes" and row[14] == "Yes" and sm_plan_sub_status == 0 %}
+                                            <BR><a href="{{ url_for('main.admin_juror_approval') }}?type=assign_chair&juror_id={{row[0]}}&juror_name={{row[5]}}" class="btn btn-info">Assign as Chair</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                   {{ row[16] }}
+                                </td>
+                                <td>
+                                    {% if row[4] > 0 %}
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading" role="tab" id="collapse-heading-team{{ row[0] }}">
+                                                <button type="button" class="btn btn-default" style="width: 138px;" data-toggle="collapse" data-parent="#accordion" data-target="#team{{ row[0] }}">
+                                                    Has COI?
+                                                   {% if row[1] == 1 %}
+                                                        Yes
+                                                   {% else %}
+                                                        No
+                                                   {% endif %}
+                                                </button>
+                                            </div>
+                                            <div class="panel-collapse collapse" id="team{{ row[0] }}" role="tabpanel" aria-labelledby="collapse-heading-team{{ row[0] }}">
+                                                <div class="panel-body">
+                                                    <ul>
+                                                        {% for coi_school in row[3] %}
+                                                            <li>
+                                                                {% if coi_school[1] == row[17] %}
+                                                                    *
+                                                                {% endif %}
+                                                                {{ coi_school[2] }} - {{ coi_school[4] }} - {{ coi_school[5] }}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+
+<script>
+
+$('.toggle-all').click(function(){
+
+    if ($(this).data("lastState") === null || $(this).data("lastState") === 0) {
+        $('.collapse.in').collapse('hide');
+        $(this).data("lastState",1);
+        $(this).text("Toggle - Open All");
+    }
+    else {
+
+        $('.panel-collapse').removeData('bs.collapse')
+        .collapse({parent:false, toggle:false})
+        .collapse('show')
+        .removeData('bs.collapse')
+        .collapse({parent:'#accordion', toggle:false});
+
+        $(this).data("lastState",0);
+        $(this).text("Toggle - Close All");
+    }
+
+});
+
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+</script>
+
+{% endblock %}

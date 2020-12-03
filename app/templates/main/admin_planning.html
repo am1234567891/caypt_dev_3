@@ -1,0 +1,356 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Tournament Admin Management
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+     <div class="container mt-3">
+            <div class="alert alert-danger">
+              <strong>Danger!</strong> Only one administrator can work on the planning at the same point of time.
+            </div>
+            <ul class="nav nav-tabs">
+                <li><a href="/admin_mgmt">View</a></li>
+                <li class="active"><a href="/admin_planning">Plan Selective Matches</a></li>
+                <li><a href="#">Plan Final Matches</a></li>
+            </ul>
+            <br>
+            <span class="d-block bg-info">
+                Randomly generate the schedule for the selective matches.
+            </span>
+      </div>
+    <form action="" method="post" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3>Input Parameters</h3>
+                    <div class="form-group">
+                        {{ render_field(form.teams_total_number, tabindex=250,) }}
+                        {{ render_field(form.teams_mini_number, tabindex=255,) }}
+                        {{ render_field(form.rounds_total_number, readonly=true, tabindex=260) }}
+                        {{ render_field(form.rooms_for_each_round, tabindex=270) }}
+                        {{ render_field(form.max_re_do_times, tabindex=280) }}
+                        {{ render_field(form.max_repeated_rooms, tabindex=280) }}
+                        <div class="form-group">
+                            {{ form.last_round_repeatable.label }}
+                            {% for acceptfield in form.last_round_repeatable %}
+                                {{ acceptfield}} {{ acceptfield.label}}
+                            {% endfor %}
+                        </div>
+
+                        <br><hr>
+                        {{ render_submit_field(form.submit, tabindex=300) }}
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <h3>
+                        Proposed Plan
+                        {% if revise_juror_room and team_plan %}
+                            (successfully)
+                        {% elif team_plan  %}
+                            (failed)
+                        {% endif %}
+                    </h3>
+                    {% if revise_juror_room and team_plan %}
+                        <span class="d-block bg-info">
+                            You can re-generate the plan by clicking the 'Generate Plan' button, or check 'Yes' and click 'Accept Proposal' to process the planning. <BR><BR>
+                        </span>
+                        <div class="form-group">
+                            {{ form.accept_proposal.label }}
+                            {% for acceptfield in form.accept_proposal %}
+                                {{ acceptfield}} {{ acceptfield.label}}
+                            {% endfor %}
+                            {{ render_submit_field(form.accept, tabindex=290) }}
+                        </div>
+                    {% elif  team_plan  %}
+                        <span class="d-block bg-warning">
+                            To re-generate please click the 'Generate Plan' button. <BR><BR>
+                        </span>
+                    {% endif %}
+                    <HR>
+                    <h4>Team Auto-Planning Results:</h4>
+                    <table class="table small">
+                        <thead>
+                            <tr>
+                                <th>School</th>
+                                <th> - </th>
+                                {% for team in team_plan %}
+                                <th>
+                                    {{ team['school_id'] }} - {{ team['school_name'] }}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td>team</td>
+                                <th> - </th>
+                                {% for team in team_plan %}
+                                <td>
+                                    {{ team['team_id'] }} - {{ team['team_name'] }}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td>Round #<BR>-team code</td>
+                                <th> -Room code </th>
+                                {% for team in team_plan %}
+                                <td>
+                                    (<font color="red">Team{{ team['team_code'] }}</font>)
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range(round_count) %}
+                                <tr>
+                                    <td>
+                                        {{ i+1 }}
+                                        {% for round_team in round_plan[i]['round_team_matches_code'] %}
+                                            <BR>- {{round_team}}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for round_team in round_plan[i]['round_team_matches_room_codes'] %}
+                                            <BR>- {{round_team}}
+                                        {% endfor %}
+                                    </td>
+                                    {% for item in team_plan %}
+                                        <td>
+                                            vs Team#{{ item["opponents"][i] }}
+                                            <BR> Room#<font color="red">{{ item["room_codes"][i] }}</font>
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <HR>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3>Room Plan</h3>
+                    <table class="table small">
+                        <thead>
+                            <tr>
+                                <th>Room Code</th>
+                                <th>Room No.</th>
+                                <th>Jurors</th>
+                                {% for i in range(round_count) %}
+                                    <th>
+                                        Round #{{ i+1 }}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in room_plan %}
+                                <tr>
+                                    <td>
+                                        {{room['room_code']}}
+                                        <BR>cois:
+                                        {% if room['room_cois'] %}
+                                            {{ room['room_cois']  }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{room['room_number']}}
+                                        <BR>{{ room['room_type']  }}
+                                        <BR>telec?: {{ room['room_telec']  }}
+                                    </td>
+                                    <td>
+                                        <table class="table small">
+                                            <thead>
+                                                <tr>
+                                                    <th>Juror Code</th>
+                                                    <th>Juror Name</th>
+                                                    <th>Day1(AM)-Day1(PM) <BR>-Day2(AM)-Day2(PM)</th>
+                                                    <th>Conflict of Interests</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for juror_code in room['jurors'] %}
+                                                    <tr>
+                                                        <td>
+                                                            {{ juror_plan[juror_code -1]['juror_code']}} - room{{juror_plan[juror_code - 1]['room_code']  }}
+                                                            {% if juror_plan[juror_code -1]['is_chair'] == "Yes" %}
+                                                            <BR> -(Chair)
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {{ juror_plan[juror_code -1]['juror_info'][5]}} - {{ juror_plan[juror_code -1]['juror_info'][15]}}
+                                                            {% if juror_plan[juror_code -1]['juror_info'][17] > 0 %}
+                                                            <BR>(*team lead)
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {{ juror_plan[juror_code -1]['juror_info'][11]}}
+                                                            -{{ juror_plan[juror_code -1]['juror_info'][12]}}
+                                                            -{{ juror_plan[juror_code -1]['juror_info'][13]}}
+                                                            -{{ juror_plan[juror_code -1]['juror_info'][14]}}
+                                                        </td>
+                                                        <td>
+                                                            <ul>
+                                                                {% for coi_school in juror_plan[juror_code -1]['juror_info'][3] %}
+                                                                    <li>
+                                                                        {% if coi_school[1] == juror_plan[juror_code -1]['juror_info'][17] %}
+                                                                            *
+                                                                        {% endif %}
+                                                                        {{ coi_school[1] }} - {{ coi_school[2] }} - {{ coi_school[4] }} - {{ coi_school[5] }}
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    {% for i in range(round_count) %}
+                                        <td>
+                                            {%if room['room_team_matches_codes'][i] %}
+                                                Team codes:<BR>-{{ room['room_team_matches_codes'][i] }}
+                                                <BR>School IDs:<BR>{{ room['room_team_matches_school_ids'][i] }}
+                                            {% elif revise_juror_room %}
+                                                <font color="red">---Revise Juror room code:</font>
+                                                <ul>
+                                                {% for juror_code in room['jurors'] %}
+                                                    <li>
+                                                        {{ juror_plan[juror_code -1]['juror_code']}} - room{{juror_plan[juror_code - 1]['room_code']  }}
+                                                        <input type="text" id="rmj-1-18" name="rmj-{{juror_plan[juror_code - 1]['room_code']  }}-{{ juror_plan[juror_code -1]['juror_code']}}" maxlength="1" size="2">
+                                                    </li>
+                                                {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <HR>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3>Volunteer Room Assignment</h3>
+                    <table class="table small">
+                        <thead>
+                            <tr>
+                                <th>Room:</th>
+                                {% for room in room_plan%}
+                                    <th>
+                                        {{room['room_code']}} - {{room['room_number']}}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Volunteer: </td>
+                                {% for room in room_plan%}
+                                    <td>
+                                        <ul>
+                                        {% for volunteer_code in room['volunteers'] %}
+                                            <li>{{volunteer_code}} - {{volunteer_plan[volunteer_code-1]['volunteer_name']}}
+                                                {% if volunteer_plan[volunteer_code-1]['data_entry'] == "Yes" %}
+                                                    (Data Entry)
+                                                {% endif %}
+                                                {% if volunteer_plan[volunteer_code-1]['cois'] %}
+                                                    - cois: {{volunteer_plan[volunteer_code-1]['cois']}}
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                        </ul>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td>school ids in the room</td>
+                                {% for room in room_plan%}
+                                    <td>
+                                        <ul>
+                                        {% for room_sid in room['room_sids'] %}
+                                            <li>{{room_sid}}
+                                            </li>
+                                        {% endfor %}
+                                        </ul>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if not_assigned_volunteers %}
+                <div class="row">
+                    <div class="col-lg-4">
+                        <h3><font color="red">Not Assigned Volunteers</font></h3>
+                    </div>
+                    <div class="col-lg-8">
+                        {% for volunteer in not_assigned_volunteers %}
+                            <li>{{volunteer}}</li>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3>Other Jurors</h3>
+                    <table class="table small">
+                        <thead>
+                            <tr>
+                                <th>Juror Code</th>
+                                {% for round in round_plan%}
+                                    <th>
+                                        Round #{{round['round_code']}}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for juror in moved_jurors_plan%}
+                                <tr>
+                                    <td>{{juror['juror_code']}} - {{juror['juror_info'][5]}}
+                                        {% if juror['juror_cois'] %}
+                                            - cois: {{juror['juror_cois']}}
+                                        {% endif %}
+                                        <BR>{{juror['juror_info'][11]}} - {{juror['juror_info'][12]}} - {{juror['juror_info'][13]}} - {{juror['juror_info'][14]}}
+                                    </td>
+                                    {% for room_code in juror['round_room_codes'] %}
+                                        <td>
+                                            {% if room_code > 0: %}
+                                                Room #{{room_code}}-{{room_plan[room_code-1]['room_team_matches_codes'][loop.index0]}}-{{room_plan[room_code-1]['room_team_matches_school_ids'][loop.index0]}}
+                                            {% else %}
+                                                Not available
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}

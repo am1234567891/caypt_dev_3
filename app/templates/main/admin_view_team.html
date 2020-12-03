@@ -1,0 +1,139 @@
+{% extends "main/main_base_bi.html" %}  {# main/main_base_chart.html extends app_main_layout_bi.html #}
+
+{% block page_title %}
+    Administration Dashboard
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block body %}
+    {{ super() }}
+    <hr>
+    <h3>Team Registration</h3>
+    <h4>Teams that are {{ team_status }}</h4>
+
+    <BR><BR>
+    {% if teams_count > 0 %}
+        <div class="container">
+            <input class="form-control" id="myInput" style="width: 50%; float: left" type="text" placeholder="Type your word to filter..">
+            <button class="btn btn-default toggle-all" style="float: right">Toggle - Open All</button>
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                          <th>School Name</th>
+                          <th>Team Name</th>
+                          <th>Team Status</th>
+                          <th>Teleconferencing?</th>
+                          <th>Team Lead</th>
+                          <th>Team Members</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for row in team_list %}
+                            <tr>
+                                <td>
+                                    {% if row[9] == 'Valid' %}
+                                        <a href="{{ url_for('main.admin_review_school') }}?type=review&school_id={{row[7]}}", style="color:#025839">{{ row[3] }} - {{ row[9] }}</a>
+                                    {% else %}
+                                        <a href="{{ url_for('main.admin_review_school') }}?type=review&school_id={{row[7]}}">{{ row[3] }} - {{ row[9] }}</a>
+                                    {% endif %}
+
+                                </td>
+                                <td> {{ row[1] }} </td>
+                                <td>
+                                   {{ row[2] }}
+                                    {% if row[2] == 'Requested' %}
+                                        on {{ row[8] }}<BR>
+                                        {% if sm_plan_sub_status == 0 %}
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('main.admin_team_approval') }}?type=approve&team_id={{row[0]}}&team_name={{row[1]}}" class="btn btn-info">Approve</a>
+                                                <a href="{{ url_for('main.admin_team_approval') }}?type=reject&team_id={{row[0]}}&team_name={{row[1]}}" class="btn btn-primary">Reject</a>
+                                            </div>
+                                        {% endif %}
+                                    {% elif row[2] == 'Rejected' and sm_plan_sub_status == 0 %}
+                                        <a href="{{ url_for('main.admin_team_approval') }}?type=approve&team_id={{row[0]}}&team_name={{row[1]}}" class="btn btn-info">Re-Approve</a>
+                                    {% elif row[2] == 'Approved' and sm_plan_sub_status == 0 %}
+                                        {% if row[10] < 3 %}
+                                            <a href="{{ url_for('main.admin_team_approval') }}?type=reject&team_id={{row[0]}}&team_name={{row[1]}}" class="btn btn-primary">Reject</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td> {{ row[11] }} </td>
+                                <td> {{ row[4] }} </td>
+                                <td>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" role="tab" id="collapse-heading-team{{ row[0] }}">
+                                            <button type="button" class="btn btn-default" style="width: 138px;" data-toggle="collapse" data-parent="#accordion" data-target="#team{{ row[0] }}">Team Members: {{ row[5] }}-{{ row[10] }} </button>
+                                        </div>
+                                        <div class="panel-collapse collapse" id="team{{ row[0] }}" role="tabpanel" aria-labelledby="collapse-heading-team{{ row[0] }}">
+                                            <div class="panel-body">
+                                                {% if row[5] > 0 %}
+                                                    <ul>
+                                                        {% for member in row[6] %}
+                                                            <li>
+                                                                {{ member[4] }} {{ member[5] }} - {{ member[3] }} - {{ member[7] }}
+                                                                {% if member[2] == 1 %}
+                                                                    (Captain)
+                                                                {% endif %}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    No team member yet
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+
+<script>
+
+$('.toggle-all').click(function(){
+
+    if ($(this).data("lastState") === null || $(this).data("lastState") === 0) {
+        $('.collapse.in').collapse('hide');
+        $(this).data("lastState",1);
+        $(this).text("Toggle - Open All");
+    }
+    else {
+
+        $('.panel-collapse').removeData('bs.collapse')
+        .collapse({parent:false, toggle:false})
+        .collapse('show')
+        .removeData('bs.collapse')
+        .collapse({parent:'#accordion', toggle:false});
+
+        $(this).data("lastState",0);
+        $(this).text("Toggle - Close All");
+    }
+
+});
+
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}Member Dashboard <HR>{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+    <h3>Update {{ form.role_type.data }} Information</h3>
+    <BR><BR>
+
+    <form action="" method="post" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <input type="hidden" id="ppant_id" name="ppant_id" value="{{ form.ppant_id.data }}">
+                        {% if form.role_type.data == 'Juror' %}
+                            <h5>{{ form.teleconferencing.label }}</h5>
+                            <p>{{ form.teleconferencing }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        {% if form.role_type.data == 'Juror' %}
+                            <h5>{{ form.juror_experience.label }}</h5>
+                            <p>{{ form.juror_experience }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4>Update your availability</h4>
+                    {% if form.time_slot1.data == 'Yes' %}
+                        <br><input type="checkbox" name="timeslot" value="1" checked>{{two_day_timeslots['1']}}
+                    {% else %}
+                        <br><input type="checkbox" name="timeslot" value="1">{{two_day_timeslots['1']}}
+                    {% endif %}
+                    {% if form.time_slot2.data == 'Yes' %}
+                        <br><input type="checkbox" name="timeslot" value="2" checked>{{two_day_timeslots['2']}}
+                    {% else %}
+                        <br><input type="checkbox" name="timeslot" value="2">{{two_day_timeslots['2']}}
+                    {% endif %}
+                    {% if form.time_slot3.data == 'Yes' %}
+                        <br><input type="checkbox" name="timeslot" value="3" checked>{{two_day_timeslots['3']}}
+                    {% else %}
+                        <br><input type="checkbox" name="timeslot" value="3">{{two_day_timeslots['3']}}
+                    {% endif %}
+                    {% if form.time_slot4.data == 'Yes' %}
+                        <br><input type="checkbox" name="timeslot" value="4" checked>{{two_day_timeslots['4']}}
+                    {% else %}
+                        <br><input type="checkbox" name="timeslot" value="4">{{two_day_timeslots['4']}}
+                    {% endif %}
+                    <br>
+                    <br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4>Declare Conflict of Interest (COI)</h4>
+                    <input type="hidden" id="last_coi_count" name="last_coi_count" value="{{ form.last_coi_count.data }}">
+                    <input type="hidden" id="tl_school_id" name="tl_school_id" value="{{ tl_school_id }}">
+                    <span class="d-block bg-info">
+                        Which school do you have a conflict of interest with? <BR>
+                        Please select the schools that you have a conflict of interest with if applicable.
+                    </span>
+                    {% for school in current_school_list %}
+                        {% if school[0] in my_coi_ids %}
+                            {% if school[0] == tl_school_id %}
+                                <br><input type="checkbox" name="school" value="{{school[0]}}" checked disabled >{{school[1]}} (school led by you)
+                            {% else %}
+                                <br><input type="checkbox" name="school" value="{{school[0]}}" checked>{{school[1]}}
+                            {% endif %}
+                        {% else %}
+                            <br><input type="checkbox" name="school" value="{{school[0]}}">{{school[1]}}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <br><hr>
+                {{ render_submit_field(form.submit, tabindex=410) }}
+            </div>
+        </div>
+    </form>
+{% endblock %}

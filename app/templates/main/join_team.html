@@ -1,0 +1,78 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block extra_css %}
+    <script>
+        $(document).ready(function () {
+            $('#team_school_id').bind('change', function () {
+                var elements = $('div.school_team').children().hide(); // hide all the elements
+                var value = $(this).val();
+
+                if (value.length) { // if somethings' selected
+                    elements.filter('.' + value).show(); // show the ones we want
+                }
+            }).trigger('change'); // Setup the initial states
+        });
+    </script>
+{% endblock %}
+
+{% block page_title %}Join a team{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <h3>Apply to a Team</h3>
+    </div>
+    <form action="" method="post" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class = "container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <span class="d-block bg-info">
+                        Please select the school for the team.
+                    </span>
+                    <div class="form-group">
+                        {{ render_field(form.team_school_id, tabindex=330) }}
+                    </div>
+
+                    <div class="school_team">
+
+                        {% for current_school in current_school_list %}
+                            {% if current_school[0] > 0 %}
+                            <div class="{{ current_school[0] }}">
+                                <span class="d-block bg-info">
+                                    <BR>Select one team of the {{ current_school[1] }}. <BR>
+                                </span>
+                                Your application will be reviewed by the team lead, please contact the team lead if you have any questions.<BR><BR>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+                    <div class="school_team">
+                        {% for school in current_team_options %}
+                            <div class="{{ school[0] }}">
+                                <div class="form-group">
+                                    <label>Team(s) in {{ school[1] }} </label>
+                                    {% for school_team in school[2] %}
+                                        <div class="radio">
+                                            <label><input type="radio" name="team_id" value="{{ school_team[2] }}">{{ school_team[3] }} - team lead: {{ school_team[12] }} {{ school_team[13] }} ({{ school_team[14] }})</label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <br><hr>
+                {{ render_submit_field(form.submit, tabindex=290) }}
+            </div>
+        </div>
+    </form>
+
+{% endblock %}

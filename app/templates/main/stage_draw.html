@@ -1,0 +1,94 @@
+{% extends "main/main_base.html" %}  {# main/main_base.html extends app_main_layout.html #}
+
+{% block page_title %}
+    Stage Management - Room A
+    <div class="dropdown" style="float: right">
+        <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Action
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="/admin_view_regist?type=team">Team Registration</a></li>
+          <li><a href="/admin_view_regist?type=student">Student Registration</a></li>
+          <li><a href="/admin_view_regist?type=juror">Juror Registration</a></li>
+          <li><a href="/admin_view_regist?type=volunteer">Volunteer Registration</a></li>
+          <li><a href="/admin">Planning</a></li>
+          <li><a href="#">Report (coming soon)</a></li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+
+{% block body %}
+    {{ super() }}
+
+    <div class="container mt-3">
+        <div class="alert alert-danger">
+          <strong>Caution! Please do NOT share your account with others.</strong>
+            If you have any questions, please contact the information team ASAP.
+        </div>
+        <ul class="nav nav-tabs">
+            <li><a href="/stage_mgmt">Select Match</a></li>
+            <li class="active"><a href="#">Draw</a></li>
+            <li><a href="#">Assign Member</a></li>
+            <li><a href="#">Timing</a></li>
+            <li><a href="#">Enter Scores</a></li>
+        </ul>
+        <br>
+    </div>
+    <div class = "container">
+        <h3>Round 2A</h3>
+        <h4>Draw results:</h4>
+        <form class="form-inline" action="">
+            <div class="form-group">
+                <label for="sel1">Team <span style='font-size:18px; color:black'>&#10102;</span>:</label>
+                  <select class="form-control" id="sel1">
+                    <option>Select...</option>
+                    <option selected>RHHS</option>
+                    <option>UTS</option>
+                  </select>
+            </div>
+            <div class="form-group">
+                <label for="sel2">Team <span style='font-size:18px; color:black'>&#10103;</span>:</label>
+                  <select class="form-control" id="sel2">
+                    <option>Select...</option>
+                    <option>RHHS</option>
+                    <option selected>UTS</option>
+                  </select>
+            </div>
+            <button type="submit" class="btn btn-info">Submit</button>
+        </form>
+
+        <BR>
+        <div class="row">
+            <div class="col-lg-8">
+                <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Stage #</th>
+                        <th>Match Type</th>
+                        <th>Reporter</th>
+                        <th>Opponent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="/stage_select">Stage 1</a></td>
+                        <td>Selective Match &#10102; - &#10103; </td>
+                        <td>RHHS</td>
+                        <td>UTS</td>
+                    </tr>
+                    <tr>
+                        <td>Stage 2</td>
+                        <td>Selective Match &#10103; - &#10102; </td>
+                        <td>UTS</td>
+                        <td>RHHS</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+    <div class = "container">
+    </div>
+
+{% endblock %}
